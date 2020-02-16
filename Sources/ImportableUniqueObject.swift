@@ -2,7 +2,7 @@
 //  ImportableUniqueObject.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import CoreData
      // ...
  }
  
- CoreStore.perform(
+ dataStack.perform(
      asynchronous: { (transaction) -> Void in
          let json: NSDictionary = // ...
          let person = try transaction.importUniqueObject(
@@ -116,16 +116,16 @@ public protocol ImportableUniqueObject: ImportableObject {
 }
 
 
-// MARK: - ImportableUniqueObject (Default Implementations)
+// MARK: - ImportableUniqueObject where UniqueIDType.QueryableNativeType: CoreDataNativeType
 
-public extension ImportableUniqueObject where UniqueIDType.QueryableNativeType: CoreDataNativeType {
+extension ImportableUniqueObject where UniqueIDType.QueryableNativeType: CoreDataNativeType {
     
-    var uniqueIDValue: UniqueIDType {
+    public var uniqueIDValue: UniqueIDType {
         
         get {
             
             return self.cs_toRaw().getValue(
-                forKvcKey: type(of: self).uniqueIDKeyPath,
+                forKvcKey: self.runtimeType().uniqueIDKeyPath,
                 didGetValue: { UniqueIDType.cs_fromQueryableNativeType($0 as! UniqueIDType.QueryableNativeType)! }
             )
         }
@@ -134,59 +134,29 @@ public extension ImportableUniqueObject where UniqueIDType.QueryableNativeType: 
             self.cs_toRaw()
                 .setValue(
                     newValue,
-                    forKvcKey: type(of: self).uniqueIDKeyPath,
+                    forKvcKey: self.runtimeType().uniqueIDKeyPath,
                     willSetValue: { ($0.cs_toQueryableNativeType() as CoreDataNativeType) }
             )
         }
     }
 }
 
-public extension ImportableUniqueObject {
+
+// MARK: - ImportableUniqueObject
+
+extension ImportableUniqueObject {
     
-    static func shouldInsert(from source: ImportSource, in transaction: BaseDataTransaction) -> Bool {
+    public static func shouldInsert(from source: ImportSource, in transaction: BaseDataTransaction) -> Bool {
         
         return Self.shouldUpdate(from: source, in: transaction)
     }
     
-    static func shouldUpdate(from source: ImportSource, in transaction: BaseDataTransaction) -> Bool{
+    public static func shouldUpdate(from source: ImportSource, in transaction: BaseDataTransaction) -> Bool{
         
         return true
     }
     
-    func didInsert(from source: Self.ImportSource, in transaction: BaseDataTransaction) throws {
-        
-        try self.update(from: source, in: transaction)
-    }
-    
-    
-    // MARK: Obsolete
-    
-    @available(*, obsoleted: 3.1, renamed: "shouldInsert(from:in:)")
-    static func shouldInsertFromImportSource(_ source: ImportSource, inTransaction transaction: BaseDataTransaction) -> Bool {
-        
-        return Self.shouldInsert(from: source, in: transaction)
-    }
-    
-    @available(*, obsoleted: 3.1, renamed: "shouldUpdate(from:in:)")
-    static func shouldUpdateFromImportSource(_ source: ImportSource, inTransaction transaction: BaseDataTransaction) -> Bool {
-        
-        return Self.shouldUpdate(from: source, in: transaction)
-    }
-    
-    @available(*, obsoleted: 3.1, renamed: "uniqueID(from:in:)")
-    static func uniqueIDFromImportSource(_ source: ImportSource, inTransaction transaction: BaseDataTransaction) throws -> UniqueIDType? {
-        
-        return try Self.uniqueID(from: source, in: transaction)
-    }
-    
-    @available(*, obsoleted: 3.1, renamed: "didInsert(from:in:)")
-    func didInsertFromImportSource(_ source: ImportSource, inTransaction transaction: BaseDataTransaction) throws {
-        
-        try self.didInsert(from: source, in: transaction)
-    }
-    
-    @available(*, obsoleted: 3.1, renamed: "update(from:in:)")
-    func updateFromImportSource(_ source: ImportSource, inTransaction transaction: BaseDataTransaction) throws {
+    public func didInsert(from source: Self.ImportSource, in transaction: BaseDataTransaction) throws {
         
         try self.update(from: source, in: transaction)
     }

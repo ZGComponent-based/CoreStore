@@ -2,7 +2,7 @@
 //  CSGroupBy.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -87,7 +87,7 @@ public final class CSGroupBy: NSObject, CSQueryClause {
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -104,7 +104,7 @@ public final class CSGroupBy: NSObject, CSQueryClause {
     
     public let bridgeToSwift: GroupBy<NSManagedObject>
     
-    public init<D: NSManagedObject>(_ swiftValue: GroupBy<D>) {
+    public init<O: NSManagedObject>(_ swiftValue: GroupBy<O>) {
         
         self.bridgeToSwift = swiftValue.downcast()
         super.init()
@@ -114,7 +114,7 @@ public final class CSGroupBy: NSObject, CSQueryClause {
 
 // MARK: - GroupBy
 
-extension GroupBy where D: NSManagedObject {
+extension GroupBy where O: NSManagedObject {
     
     // MARK: CoreStoreSwiftType
     

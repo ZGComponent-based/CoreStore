@@ -2,7 +2,7 @@
 //  CSWhere.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -134,7 +134,7 @@ public final class CSWhere: NSObject, CSFetchClause, CSQueryClause, CSDeleteClau
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -151,7 +151,7 @@ public final class CSWhere: NSObject, CSFetchClause, CSQueryClause, CSDeleteClau
     
     public let bridgeToSwift: Where<NSManagedObject>
     
-    public init<D: NSManagedObject>(_ swiftValue: Where<D>) {
+    public init<O: NSManagedObject>(_ swiftValue: Where<O>) {
         
         self.bridgeToSwift = swiftValue.downcast()
         super.init()
@@ -161,7 +161,7 @@ public final class CSWhere: NSObject, CSFetchClause, CSQueryClause, CSDeleteClau
 
 // MARK: - Where
 
-extension Where where D: NSManagedObject {
+extension Where where O: NSManagedObject {
     
     // MARK: CoreStoreSwiftType
     

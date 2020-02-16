@@ -2,7 +2,7 @@
 //  CSDataStack+Querying.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@ import CoreData
 
 // MARK: - CSDataStack
 
-public extension CSDataStack {
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
+extension CSDataStack {
     
     /**
      Fetches the `NSManagedObject` instance in the transaction's context from a reference created from a transaction or from a different managed object context.
@@ -89,11 +90,12 @@ public extension CSDataStack {
     @objc
     public func fetchOneFrom(_ from: CSFrom, fetchClauses: [CSFetchClause]) -> Any? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to fetch from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to fetch from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext.fetchOne(from, fetchClauses)
+        return (try? self.bridgeToSwift.mainContext.fetchOne(from, fetchClauses))?
+            .flatMap({ $0 })
     }
     
     /**
@@ -106,11 +108,12 @@ public extension CSDataStack {
     @objc
     public func fetchAllFrom(_ from: CSFrom, fetchClauses: [CSFetchClause]) -> [Any]? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to fetch from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to fetch from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext.fetchAll(from, fetchClauses)
+        return (try? self.bridgeToSwift.mainContext.fetchAll(from, fetchClauses))
+            .flatMap({ $0 })
     }
     
     /**
@@ -123,13 +126,12 @@ public extension CSDataStack {
     @objc
     public func fetchCountFrom(_ from: CSFrom, fetchClauses: [CSFetchClause]) -> NSNumber? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to fetch from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to fetch from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext
-            .fetchCount(from, fetchClauses)
-            .flatMap { NSNumber(value: $0) }
+        return (try? self.bridgeToSwift.mainContext.fetchCount(from, fetchClauses))
+            .flatMap({ NSNumber(value: $0) })
     }
     
     /**
@@ -142,11 +144,12 @@ public extension CSDataStack {
     @objc
     public func fetchObjectIDFrom(_ from: CSFrom, fetchClauses: [CSFetchClause]) -> NSManagedObjectID? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to fetch from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to fetch from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext.fetchObjectID(from, fetchClauses)
+        return (try? self.bridgeToSwift.mainContext.fetchObjectID(from, fetchClauses))?
+            .flatMap({ $0 })
     }
     
     /**
@@ -159,11 +162,12 @@ public extension CSDataStack {
     @objc
     public func fetchObjectIDsFrom(_ from: CSFrom, fetchClauses: [CSFetchClause]) -> [NSManagedObjectID]? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to fetch from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to fetch from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext.fetchObjectIDs(from, fetchClauses)
+        return (try? self.bridgeToSwift.mainContext.fetchObjectIDs(from, fetchClauses))
+            .flatMap({ $0 })
     }
     
     /**
@@ -179,11 +183,12 @@ public extension CSDataStack {
     @objc
     public func queryValueFrom(_ from: CSFrom, selectClause: CSSelect, queryClauses: [CSQueryClause]) -> Any? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to query from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to query from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext.queryValue(from, selectClause, queryClauses)
+        return (try? self.bridgeToSwift.mainContext.queryValue(from, selectClause, queryClauses))
+            .flatMap({ $0 })
     }
     
     /**
@@ -199,10 +204,11 @@ public extension CSDataStack {
     @objc
     public func queryAttributesFrom(_ from: CSFrom, selectClause: CSSelect, queryClauses: [CSQueryClause]) -> [[String: Any]]? {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to query from a \(cs_typeName(self)) outside the main thread."
+            "Attempted to query from a \(Internals.typeName(self)) outside the main thread."
         )
-        return self.bridgeToSwift.mainContext.queryAttributes(from, selectClause, queryClauses)
+        return (try? self.bridgeToSwift.mainContext.queryAttributes(from, selectClause, queryClauses))
+            .flatMap({ $0 })
     }
 }

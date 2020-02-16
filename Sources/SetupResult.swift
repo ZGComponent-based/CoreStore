@@ -2,7 +2,7 @@
 //  SetupResult.swift
 //  CoreStore
 //
-//  Copyright © 2014 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,23 +31,10 @@ import CoreData
 
 /**
  The `SetupResult` indicates the result of an asynchronous initialization of a persistent store.
- The `SetupResult` can be treated as a boolean:
+ `SetupResult.success` indicates that the storage setup succeeded. The associated object for this `enum` value is the related `StorageInterface` instance.
+ `SetupResult.failure` indicates that the storage setup failed. The associated object for this value is the related `CoreStoreError` enum value.
  ```
- try! CoreStore.addStorage(
-     SQLiteStore(),
-     completion: { (result: SetupResult) -> Void in
-         if result {
-             // succeeded
-         }
-         else {
-             // failed
-         }
-     }
- )
- ```
- or as an `enum`, where the resulting associated object can also be inspected:
- ```
- try! CoreStore.addStorage(
+ try! dataStack.addStorage(
      SQLiteStore(),
      completion: { (result: SetupResult) -> Void in
          switch result {
@@ -60,79 +47,4 @@ import CoreData
  )
  ```
  */
-public enum SetupResult<T: StorageInterface>: Hashable {
-    
-    /**
-     `SetupResult.success` indicates that the storage setup succeeded. The associated object for this `enum` value is the related `StorageInterface` instance.
-     */
-    case success(T)
-    
-    /**
-     `SetupResult.failure` indicates that the storage setup failed. The associated object for this value is the related `CoreStoreError` enum value.
-     */
-    case failure(CoreStoreError)
-    
-    
-    /**
-     Returns `true` if the result indicates `.success`, `false` if the result is `.failure`.
-     */
-    public var isSuccess: Bool {
-        
-        switch self {
-            
-        case .success: return true
-        case .failure: return false
-        }
-    }
-    
-    
-    // MARK: Equatable
-    
-    public static func == <T, U>(lhs: SetupResult<T>, rhs: SetupResult<U>) -> Bool {
-        
-        switch (lhs, rhs) {
-            
-        case (.success(let storage1), .success(let storage2)):
-            return storage1 === storage2
-            
-        case (.failure(let error1), .failure(let error2)):
-            return error1 == error2
-            
-        default:
-            return false
-        }
-    }
-    
-    
-    // MARK: Hashable
-    
-    public var hashValue: Int {
-        
-        switch self {
-            
-        case .success(let storage):
-            return true.hashValue ^ ObjectIdentifier(storage).hashValue
-            
-        case .failure(let error):
-            return false.hashValue ^ error.hashValue
-        }
-    }
-    
-    
-    // MARK: Internal
-    
-    internal init(_ storage: T) {
-        
-        self = .success(storage)
-    }
-    
-    internal init(_ error: CoreStoreError) {
-        
-        self = .failure(error)
-    }
-    
-    internal init(_ error: Error) {
-        
-        self = .failure(CoreStoreError(error))
-    }
-}
+public typealias SetupResult<StorageInterfaceType> = Swift.Result<StorageInterfaceType, CoreStoreError> where StorageInterfaceType: StorageInterface

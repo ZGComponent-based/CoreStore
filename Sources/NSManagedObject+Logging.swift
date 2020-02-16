@@ -2,7 +2,7 @@
 //  NSManagedObject+Logging.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import CoreData
 
 // MARK: - NSManagedObject
 
-internal extension NSManagedObject {
+extension NSManagedObject {
     
     @nonobjc
     internal func isRunningInAllowedQueue() -> Bool? {
@@ -38,15 +38,7 @@ internal extension NSManagedObject {
             
             return nil
         }
-        if context.isTransactionContext {
-            
-            return context.parentTransaction?.isRunningInAllowedQueue()
-        }
-        if context.isDataStackContext {
-            
-            return Thread.isMainThread
-        }
-        return nil
+        return context.isRunningInAllowedQueue()
     }
     
     @nonobjc
@@ -56,14 +48,6 @@ internal extension NSManagedObject {
             
             return nil
         }
-        if context.isTransactionContext {
-            
-            return true
-        }
-        if context.isDataStackContext {
-            
-            return false
-        }
-        return nil
+        return context.isEditableInContext()
     }
 }

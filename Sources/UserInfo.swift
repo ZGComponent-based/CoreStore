@@ -2,7 +2,7 @@
 //  UserInfo.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ import Foundation
  enum Static {
      static var myDataKey: Void?
  }
- CoreStore.defaultStack.userInfo[&Static.myDataKey] = myObject
+ CoreStoreDefaults.dataStack.userInfo[&Static.myDataKey] = myObject
  ```
  - Important: Do not use this class to store thread-sensitive data.
  */
@@ -46,7 +46,7 @@ public final class UserInfo {
      enum Static {
         static var myDataKey: Void?
      }
-     CoreStore.defaultStack.userInfo[&Static.myDataKey] = myObject
+     CoreStoreDefaults.dataStack.userInfo[&Static.myDataKey] = myObject
      ```
      - Important: Do not use this method to store thread-sensitive data.
      - parameter key: the key for custom data. Make sure this is a static pointer that will never be changed.
@@ -79,7 +79,7 @@ public final class UserInfo {
      enum Static {
          static var myDataKey: Void?
      }
-     CoreStore.defaultStack.userInfo[&Static.myDataKey, lazyInit: { MyObject() }] = myObject
+     CoreStoreDefaults.dataStack.userInfo[&Static.myDataKey, lazyInit: { MyObject() }] = myObject
      ```
      - Important: Do not use this method to store thread-sensitive data.
      - parameter key: the key for custom data. Make sure this is a static pointer that will never be changed.

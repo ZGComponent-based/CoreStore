@@ -3,7 +3,7 @@
 //  CoreStoreDemo
 //
 //  Created by John Rommel Estropia on 2015/05/05.
-//  Copyright © 2015 John Rommel Estropia. All rights reserved.
+//  Copyright © 2018 John Rommel Estropia. All rights reserved.
 //
 
 import Foundation
@@ -25,6 +25,11 @@ final class Palette: CoreStoreObject {
         isTransient: true,
         customGetter: Palette.getColorName
     )
+
+    static func randomHue() -> Int {
+
+        return Int(arc4random_uniform(360))
+    }
     
     private static func getColorName(_ partialObject: PartialObject<Palette>) -> String? {
         
@@ -68,10 +73,13 @@ extension Palette {
         
         return "H: \(self.hue.value)˚, S: \(round(self.saturation.value * 100.0))%, B: \(round(self.brightness.value * 100.0))%"
     }
-    
+}
+
+extension Palette {
+
     func setInitialValues(in transaction: BaseDataTransaction) {
-        
-        self.hue .= Int(arc4random_uniform(360))
+
+        self.hue .= Palette.randomHue()
         self.saturation .= Float(1.0)
         self.brightness .= Float(arc4random_uniform(70) + 30) / 100.0
     }

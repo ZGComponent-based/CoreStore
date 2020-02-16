@@ -2,7 +2,7 @@
 //  CoreStore+Setup.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,132 +29,89 @@ import CoreData
 
 // MARK: - CoreStore
 
-public extension CoreStore {
+@available(*, deprecated, message: "Call methods directly from the DataStack instead")
+extension CoreStore {
     
     /**
-     Returns the `defaultStack`'s model version. The version string is the same as the name of a version-specific .xcdatamodeld file or `CoreStoreSchema`.
+     Returns the `CoreStoreDefaults.dataStack`'s model version. The version string is the same as the name of a version-specific .xcdatamodeld file or `CoreStoreSchema`.
      */
     public static var modelVersion: String {
         
-        return self.defaultStack.modelVersion
+        return CoreStoreDefaults.dataStack.modelVersion
     }
     
     /**
-     Returns the entity name-to-class type mapping from the `defaultStack`'s model.
+     Returns the entity name-to-class type mapping from the `CoreStoreDefaults.dataStack`'s model.
      */
     public static func entityTypesByName(for type: NSManagedObject.Type) -> [EntityName: NSManagedObject.Type] {
         
-        return self.defaultStack.entityTypesByName(for: type)
+        return CoreStoreDefaults.dataStack.entityTypesByName(for: type)
     }
     
     /**
-     Returns the entity name-to-class type mapping from the `defaultStack`'s model.
+     Returns the entity name-to-class type mapping from the `CoreStoreDefaults.dataStack`'s model.
      */
     public static func entityTypesByName(for type: CoreStoreObject.Type) -> [EntityName: CoreStoreObject.Type] {
         
-        return self.defaultStack.entityTypesByName(for: type)
+        return CoreStoreDefaults.dataStack.entityTypesByName(for: type)
     }
     
     /**
-     Returns the `NSEntityDescription` for the specified `NSManagedObject` subclass from `defaultStack`'s model.
+     Returns the `NSEntityDescription` for the specified `NSManagedObject` subclass from `CoreStoreDefaults.dataStack`'s model.
      */
     public static func entityDescription(for type: NSManagedObject.Type) -> NSEntityDescription? {
         
-        return self.defaultStack.entityDescription(for: type)
+        return CoreStoreDefaults.dataStack.entityDescription(for: type)
     }
     
     /**
-     Returns the `NSEntityDescription` for the specified `CoreStoreObject` subclass from `defaultStack`'s model.
+     Returns the `NSEntityDescription` for the specified `CoreStoreObject` subclass from `CoreStoreDefaults.dataStack`'s model.
      */
     public static func entityDescription(for type: CoreStoreObject.Type) -> NSEntityDescription? {
         
-        return self.defaultStack.entityDescription(for: type)
+        return CoreStoreDefaults.dataStack.entityDescription(for: type)
     }
     
     /**
-     Creates an `SQLiteStore` with default parameters and adds it to the `defaultStack`. This method blocks until completion.
+     Creates an `SQLiteStore` with default parameters and adds it to the `CoreStoreDefaults.dataStack`. This method blocks until completion.
      ```
      try CoreStore.addStorageAndWait()
      ```
-     - returns: the local SQLite storage added to the `defaultStack`
+     - returns: the local SQLite storage added to the `CoreStoreDefaults.dataStack`
      */
     @discardableResult
     public static func addStorageAndWait() throws -> SQLiteStore {
         
-        return try self.defaultStack.addStorageAndWait(SQLiteStore())
+        return try CoreStoreDefaults.dataStack.addStorageAndWait(SQLiteStore())
     }
     
     /**
-     Adds a `StorageInterface` to the `defaultStack` and blocks until completion.
+     Adds a `StorageInterface` to the `CoreStoreDefaults.dataStack` and blocks until completion.
      ```
      try CoreStore.addStorageAndWait(InMemoryStore(configuration: "Config1"))
      ```
      - parameter storage: the `StorageInterface`
      - throws: a `CoreStoreError` value indicating the failure
-     - returns: the `StorageInterface` added to the `defaultStack`
+     - returns: the `StorageInterface` added to the `CoreStoreDefaults.dataStack`
      */
     @discardableResult
     public static func addStorageAndWait<T: StorageInterface>(_ storage: T) throws -> T {
         
-        return try self.defaultStack.addStorageAndWait(storage)
+        return try CoreStoreDefaults.dataStack.addStorageAndWait(storage)
     }
     
     /**
-     Adds a `LocalStorage` to the `defaultStack` and blocks until completion.
+     Adds a `LocalStorage` to the `CoreStoreDefaults.dataStack` and blocks until completion.
      ```
      try CoreStore.addStorageAndWait(SQLiteStore(configuration: "Config1"))
      ```
      - parameter storage: the local storage
      - throws: a `CoreStoreError` value indicating the failure
-     - returns: the local storage added to the `defaultStack`. Note that this may not always be the same instance as the parameter argument if a previous `LocalStorage` was already added at the same URL and with the same configuration.
+     - returns: the local storage added to the `CoreStoreDefaults.dataStack`. Note that this may not always be the same instance as the parameter argument if a previous `LocalStorage` was already added at the same URL and with the same configuration.
      */
     @discardableResult
     public static func addStorageAndWait<T: LocalStorage>(_ storage: T) throws -> T {
         
-        return try self.defaultStack.addStorageAndWait(storage)
-    }
-    
-    /**
-     Adds a `CloudStorage` to the `defaultStack` and blocks until completion.
-     ```
-     guard let storage = ICloudStore(
-         ubiquitousContentName: "MyAppCloudData",
-         ubiquitousContentTransactionLogsSubdirectory: "logs/config1",
-         ubiquitousContainerID: "iCloud.com.mycompany.myapp.containername",
-         ubiquitousPeerToken: "9614d658014f4151a95d8048fb717cf0",
-         configuration: "Config1",
-         cloudStorageOptions: .recreateLocalStoreOnModelMismatch
-     ) else {
-         // iCloud is not available on the device
-         return
-     }
-     try CoreStore.addStorageAndWait(storage)
-     ```
-     - parameter storage: the local storage
-     - throws: a `CoreStoreError` value indicating the failure
-     - returns: the cloud storage added to the stack. Note that this may not always be the same instance as the parameter argument if a previous `CloudStorage` was already added at the same URL and with the same configuration.
-     */
-    @discardableResult
-    public static func addStorageAndWait<T: CloudStorage>(_ storage: T) throws -> T {
-        
-        return try self.defaultStack.addStorageAndWait(storage)
-    }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, message: "Use the new CoreStore.entityTypesByName(for:) method passing `NSManagedObject.self` as argument.")
-    public static var entityTypesByName: [EntityName: NSManagedObject.Type] {
-        
-        return self.defaultStack.entityTypesByName
-    }
-    
-    
-    // MARK: Obsolete
-    
-    @available(*, obsoleted: 3.1, renamed: "entityDescription(for:)")
-    public static func entityDescriptionForType(_ type: NSManagedObject.Type) -> NSEntityDescription? {
-        
-        return self.entityDescription(for: type)
+        return try CoreStoreDefaults.dataStack.addStorageAndWait(storage)
     }
 }

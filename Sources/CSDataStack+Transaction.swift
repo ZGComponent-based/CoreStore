@@ -2,7 +2,7 @@
 //  CSDataStack+Transaction.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,8 @@ import Foundation
 
 // MARK: - CSDataStack
 
-public extension CSDataStack {
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
+extension CSDataStack {
     
     /**
      Begins a transaction asynchronously where `NSManagedObject` creates, updates, and deletes can be made.
@@ -45,9 +46,9 @@ public extension CSDataStack {
                 closure(csTransaction)
                 if !transaction.isCommitted && transaction.hasChanges {
                     
-                    CoreStore.log(
+                    Internals.log(
                         .warning,
-                        message: "The closure for the \(cs_typeName(csTransaction)) completed without being committed. All changes made within the transaction were discarded."
+                        message: "The closure for the \(Internals.typeName(csTransaction)) completed without being committed. All changes made within the transaction were discarded."
                     )
                 }
                 try transaction.cancel()
@@ -77,9 +78,9 @@ public extension CSDataStack {
                         closure(csTransaction)
                         if !transaction.isCommitted && transaction.hasChanges {
                             
-                            CoreStore.log(
+                            Internals.log(
                                 .warning,
-                                message: "The closure for the \(cs_typeName(csTransaction)) completed without being committed. All changes made within the transaction were discarded."
+                                message: "The closure for the \(Internals.typeName(csTransaction)) completed without being committed. All changes made within the transaction were discarded."
                             )
                         }
                         try transaction.cancel()
@@ -130,22 +131,5 @@ public extension CSDataStack {
     public func refreshAndMergeAllObjects() {
         
         self.bridgeToSwift.refreshAndMergeAllObjects()
-    }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, message: "Use the new -[CSDataStack beginSynchronous:error:] API that reports failure using an error instance.")
-    @objc
-    @discardableResult
-    public func beginSynchronous(_ closure: @escaping (_ transaction: CSSynchronousDataTransaction) -> Void) -> CSSaveResult? {
-        
-        return bridge {
-            
-            self.bridgeToSwift.beginSynchronous { (transaction) in
-                
-                closure(transaction.bridgeToObjectiveC)
-            }
-        }
     }
 }

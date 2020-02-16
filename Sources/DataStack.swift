@@ -2,7 +2,7 @@
 //  DataStack.swift
 //  CoreStore
 //
-//  Copyright © 2014 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ public final class DataStack: Equatable {
      Convenience initializer for `DataStack` that creates a `SchemaHistory` from the model with the specified `modelName` in the specified `bundle`.
      
      - parameter xcodeModelName: the name of the (.xcdatamodeld) model file. If not specified, the application name (CFBundleName) will be used if it exists, or "CoreData" if it the bundle name was not set (e.g. in Unit Tests).
-     - parameter bundle: an optional bundle to load models from. If not specified, the main bundle will be used.
+     - parameter bundle: an optional bundle to load .xcdatamodeld models from. If not specified, the main bundle will be used.
      - parameter migrationChain: the `MigrationChain` that indicates the sequence of model versions to be used as the order for progressive migrations. If not specified, will default to a non-migrating data stack.
      */
     public convenience init(xcodeModelName: XcodeDataModelFileName = DataStack.applicationName, bundle: Bundle = Bundle.main, migrationChain: MigrationChain = nil) {
@@ -63,7 +63,7 @@ public final class DataStack: Equatable {
     /**
      Convenience initializer for `DataStack` that creates a `SchemaHistory` from a list of `DynamicSchema` versions.
      ```
-     CoreStore.defaultStack = DataStack(
+     CoreStoreDefaults.dataStack = DataStack(
          XcodeDataModelSchema(modelName: "MyModelV1"),
          CoreStoreSchema(
              modelVersion: "MyModelV2",
@@ -92,7 +92,7 @@ public final class DataStack: Equatable {
     /**
      Initializes a `DataStack` from a `SchemaHistory` instance.
      ```
-     CoreStore.defaultStack = DataStack(
+     CoreStoreDefaults.dataStack = DataStack(
          schemaHistory: SchemaHistory(
              XcodeDataModelSchema(modelName: "MyModelV1"),
              CoreStoreSchema(
@@ -193,7 +193,7 @@ public final class DataStack: Equatable {
      */
     public func entityDescription(for type: NSManagedObject.Type) -> NSEntityDescription? {
         
-        return self.entityDescription(for: EntityIdentifier(type))
+        return self.entityDescription(for: Internals.EntityIdentifier(type))
     }
     
     /**
@@ -201,7 +201,7 @@ public final class DataStack: Equatable {
      */
     public func entityDescription(for type: CoreStoreObject.Type) -> NSEntityDescription? {
         
-        return self.entityDescription(for: EntityIdentifier(type))
+        return self.entityDescription(for: Internals.EntityIdentifier(type))
     }
     
     /**
@@ -257,9 +257,9 @@ public final class DataStack: Equatable {
         catch {
             
             let storeError = CoreStoreError(error)
-            CoreStore.log(
+            Internals.log(
                 storeError,
-                "Failed to add \(cs_typeName(storage)) to the stack."
+                "Failed to add \(Internals.typeName(storage)) to the stack."
             )
             throw storeError
         }
@@ -280,9 +280,9 @@ public final class DataStack: Equatable {
         return try self.coordinator.performSynchronously {
             
             let fileURL = storage.fileURL
-            CoreStore.assert(
+            Internals.assert(
                 fileURL.isFileURL,
-                "The specified store URL for the \"\(cs_typeName(storage))\" is invalid: \"\(fileURL)\""
+                "The specified store URL for the \"\(Internals.typeName(storage))\" is invalid: \"\(fileURL)\""
             )
             
             if let _ = self.persistentStoreForStorage(storage) {
@@ -299,9 +299,9 @@ public final class DataStack: Equatable {
                 }
                 
                 let error = CoreStoreError.differentStorageExistsAtURL(existingPersistentStoreURL: fileURL)
-                CoreStore.log(
+                Internals.log(
                     error,
-                    "Failed to add \(cs_typeName(storage)) at \"\(fileURL)\" because a different \(cs_typeName(NSPersistentStore.self)) at that URL already exists."
+                    "Failed to add \(Internals.typeName(storage)) at \"\(fileURL)\" because a different \(Internals.typeName(NSPersistentStore.self)) at that URL already exists."
                 )
                 throw error
             }
@@ -345,106 +345,25 @@ public final class DataStack: Equatable {
                     )
                     return storage
                 }
-            }
-            catch {
-                
-                let storeError = CoreStoreError(error)
-                CoreStore.log(
-                    storeError,
-                    "Failed to add \(cs_typeName(storage)) to the stack."
-                )
-                throw storeError
-            }
-        }
-    }
-    
-    /**
-     Adds a `CloudStorage` to the stack and blocks until completion.
-     ```
-     guard let storage = ICloudStore(
-         ubiquitousContentName: "MyAppCloudData",
-         ubiquitousContentTransactionLogsSubdirectory: "logs/config1",
-         ubiquitousContainerID: "iCloud.com.mycompany.myapp.containername",
-         ubiquitousPeerToken: "9614d658014f4151a95d8048fb717cf0",
-         configuration: "Config1",
-         cloudStorageOptions: .recreateLocalStoreOnModelMismatch
-     ) else {
-         // iCloud is not available on the device
-         return
-     }
-     try dataStack.addStorageAndWait(storage)
-     ```
-     - parameter storage: the local storage
-     - throws: a `CoreStoreError` value indicating the failure
-     - returns: the cloud storage added to the stack. Note that this may not always be the same instance as the parameter argument if a previous `CloudStorage` was already added at the same URL and with the same configuration.
-     */
-    @discardableResult
-    public func addStorageAndWait<T: CloudStorage>(_ storage: T) throws -> T {
-        
-        return try self.coordinator.performSynchronously {
-            
-            if let _ = self.persistentStoreForStorage(storage) {
-                
-                return storage
-            }
-            
-            let cacheFileURL = storage.cacheFileURL
-            if let persistentStore = self.coordinator.persistentStore(for: cacheFileURL as URL) {
-                
-                if let existingStorage = persistentStore.storageInterface as? T,
-                    storage.matchesPersistentStore(persistentStore) {
-                    
-                    return existingStorage
-                }
-                
-                let error = CoreStoreError.differentStorageExistsAtURL(existingPersistentStoreURL: cacheFileURL)
-                CoreStore.log(
-                    error,
-                    "Failed to add \(cs_typeName(storage)) at \"\(cacheFileURL)\" because a different \(cs_typeName(NSPersistentStore.self)) at that URL already exists."
-                )
-                throw error
-            }
-            
-            do {
-                
-                var cloudStorageOptions = storage.cloudStorageOptions
-                cloudStorageOptions.remove(.recreateLocalStoreOnModelMismatch)
-                
-                let storeOptions = storage.dictionary(forOptions: cloudStorageOptions)
-                do {
-                    
-                    _ = try self.createPersistentStoreFromStorage(
-                        storage,
-                        finalURL: cacheFileURL,
-                        finalStoreOptions: storeOptions
+                catch let error as NSError where storage.localStorageOptions.contains(.allowSynchronousLightweightMigration) && error.isCoreDataMigrationError {
+
+                    let storeError = CoreStoreError.asynchronousMigrationRequired(
+                        localStoreURL: fileURL,
+                        NSError: error
                     )
-                    return storage
-                }
-                catch let error as NSError where storage.cloudStorageOptions.contains(.recreateLocalStoreOnModelMismatch) && error.isCoreDataMigrationError {
-                    
-                    let finalStoreOptions = storage.dictionary(forOptions: storage.cloudStorageOptions)
-                    let metadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(
-                        ofType: type(of: storage).storeType,
-                        at: cacheFileURL,
-                        options: storeOptions
+                    Internals.log(
+                        storeError,
+                        "Failed to add \(Internals.typeName(storage)) to the stack."
                     )
-                    _ = try self.schemaHistory
-                        .schema(for: metadata)
-                        .flatMap({ try storage.cs_eraseStorageAndWait(soureModel: $0.rawModel()) })
-                    _ = try self.createPersistentStoreFromStorage(
-                        storage,
-                        finalURL: cacheFileURL,
-                        finalStoreOptions: finalStoreOptions
-                    )
-                    return storage
+                    throw storeError
                 }
             }
             catch {
                 
                 let storeError = CoreStoreError(error)
-                CoreStore.log(
+                Internals.log(
                     storeError,
-                    "Failed to add \(cs_typeName(storage)) to the stack."
+                    "Failed to add \(Internals.typeName(storage)) to the stack."
                 )
                 throw storeError
             }
@@ -460,7 +379,7 @@ public final class DataStack: Equatable {
      enum Static {
         static var myDataKey: Void?
      }
-     CoreStore.defaultStack.userInfo[&Static.myDataKey] = myObject
+     CoreStoreDefaults.dataStack.userInfo[&Static.myDataKey] = myObject
      ```
      - Important: Do not use this method to store thread-sensitive data.
      */
@@ -485,7 +404,7 @@ public final class DataStack: Equatable {
     internal let schemaHistory: SchemaHistory
     internal let childTransactionQueue = DispatchQueue.serial("com.coreStore.dataStack.childTransactionQueue")
     internal let storeMetadataUpdateQueue = DispatchQueue.concurrent("com.coreStore.persistentStoreBarrierQueue")
-    internal let migrationQueue: OperationQueue = cs_lazy {
+    internal let migrationQueue: OperationQueue = Internals.with {
         
         let migrationQueue = OperationQueue()
         migrationQueue.maxConcurrentOperationCount = 1
@@ -502,7 +421,7 @@ public final class DataStack: Equatable {
             .first
     }
     
-    internal func persistentStores(for entityIdentifier: EntityIdentifier) -> [NSPersistentStore]? {
+    internal func persistentStores(for entityIdentifier: Internals.EntityIdentifier) -> [NSPersistentStore]? {
         
         var returnValue: [NSPersistentStore]? = nil
         self.storeMetadataUpdateQueue.sync(flags: .barrier) {
@@ -513,7 +432,7 @@ public final class DataStack: Equatable {
         return returnValue
     }
     
-    internal func persistentStore(for entityIdentifier: EntityIdentifier, configuration: ModelConfiguration, inferStoreIfPossible: Bool) -> (store: NSPersistentStore?, isAmbiguous: Bool) {
+    internal func persistentStore(for entityIdentifier: Internals.EntityIdentifier, configuration: ModelConfiguration, inferStoreIfPossible: Bool) -> (store: NSPersistentStore?, isAmbiguous: Bool) {
         
         return self.storeMetadataUpdateQueue.sync(flags: .barrier) { () -> (store: NSPersistentStore?, isAmbiguous: Bool) in
             
@@ -561,11 +480,11 @@ public final class DataStack: Equatable {
             for entityDescription in (self.coordinator.managedObjectModel.entities(forConfigurationName: configurationName) ?? []) {
                 
                 let managedObjectClassName = entityDescription.managedObjectClassName!
-                CoreStore.assert(
+                Internals.assert(
                     NSClassFromString(managedObjectClassName) != nil,
-                    "The class \(cs_typeName(managedObjectClassName)) for the entity \(cs_typeName(entityDescription.name)) does not exist. Check if the subclass type and module name are properly configured."
+                    "The class \(Internals.typeName(managedObjectClassName)) for the entity \(Internals.typeName(entityDescription.name)) does not exist. Check if the subclass type and module name are properly configured."
                 )
-                let entityIdentifier = EntityIdentifier(entityDescription)
+                let entityIdentifier = Internals.EntityIdentifier(entityDescription)
                 if self.finalConfigurationsByEntityIdentifier[entityIdentifier] == nil {
                     
                     self.finalConfigurationsByEntityIdentifier[entityIdentifier] = []
@@ -577,7 +496,7 @@ public final class DataStack: Equatable {
         return persistentStore
     }
     
-    internal func entityDescription(for entityIdentifier: EntityIdentifier) -> NSEntityDescription? {
+    internal func entityDescription(for entityIdentifier: Internals.EntityIdentifier) -> NSEntityDescription? {
         
         return self.schemaHistory.entityDescriptionsByEntityIdentifier[entityIdentifier]
     }
@@ -586,7 +505,7 @@ public final class DataStack: Equatable {
     // MARK: Private
     
     private var persistentStoresByFinalConfiguration = [String: NSPersistentStore]()
-    private var finalConfigurationsByEntityIdentifier = [EntityIdentifier: Set<String>]()
+    private var finalConfigurationsByEntityIdentifier = [Internals.EntityIdentifier: Set<String>]()
     
     deinit {
         
@@ -601,58 +520,5 @@ public final class DataStack: Equatable {
                 }
             }
         }
-    }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, renamed: "init(xcodeModelName:bundle:migrationChain:)")
-    public convenience init(modelName: XcodeDataModelFileName, bundle: Bundle = Bundle.main, migrationChain: MigrationChain = nil) {
-        
-        self.init(
-            xcodeModelName: modelName,
-            bundle: bundle,
-            migrationChain: migrationChain
-        )
-    }
-    
-    
-    @available(*, deprecated, message: "Use the new DataStack.init(schemaHistory:) initializer passing an UnsafeDataModelSchema instance as argument")
-    public convenience init(model: NSManagedObjectModel, migrationChain: MigrationChain = nil) {
-        
-        let modelVersion = migrationChain.leafVersions.first!
-        self.init(
-            schemaHistory: SchemaHistory(
-                allSchema: [
-                    UnsafeDataModelSchema(
-                        modelName: modelVersion,
-                        model: model
-                    )
-                ],
-                migrationChain: migrationChain,
-                exactCurrentModelVersion: modelVersion
-            )
-        )
-    }
-    
-    @available(*, deprecated, message: "Use the new DataStack.entityTypesByName(for:) method passing `NSManagedObject.self` as argument.")
-    public var entityTypesByName: [EntityName: NSManagedObject.Type] {
-        
-        return self.entityTypesByName(for: NSManagedObject.self)
-    }
-    
-    
-    // MARK: Obsolete
-    
-    @available(*, obsoleted: 3.1, renamed: "entityDescription(for:)")
-    public func entityDescriptionForType(_ type: NSManagedObject.Type) -> NSEntityDescription? {
-        
-        return self.entityDescription(for: type)
-    }
-    
-    @available(*, obsoleted: 3.1, renamed: "objectID(forURIRepresentation:)")
-    public func objectIDForURIRepresentation(_ url: URL) -> NSManagedObjectID? {
-        
-        return self.objectID(forURIRepresentation: url)
     }
 }

@@ -2,7 +2,7 @@
 //  CoreStoreObject.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ import Foundation
  ```
  `CoreStoreObject` entities for a model version should be added to `CoreStoreSchema` instance.
  ```
- CoreStore.defaultStack = DataStack(
+ CoreStoreDefaults.dataStack = DataStack(
      CoreStoreSchema(
          modelVersion: "V1",
          entities: [
@@ -63,18 +63,21 @@ open /*abstract*/ class CoreStoreObject: DynamicObject, Hashable {
     
     /**
      Do not call this directly. This is exposed as public only as a required initializer.
-     - Important: subclasses that need a custom initializer should override both `init(_:)` and `init(asMeta:)`, and to call their corresponding super implementations.
+     - Important: subclasses that need a custom initializer should override both `init(rawObject:)` and `init(asMeta:)`, and to call their corresponding super implementations.
      */
     public required init(rawObject: NSManagedObject) {
         
         self.isMeta = false
         self.rawObject = (rawObject as! CoreStoreManagedObject)
-        self.initializeAttributes(Mirror(reflecting: self), self)
+        self.registerReceiver(
+            mirror: Mirror(reflecting: self),
+            object: self
+        )
     }
     
     /**
      Do not call this directly. This is exposed as public only as a required initializer.
-     - Important: subclasses that need a custom initializer should override both `init(_:)` and `init(asMeta:)`, and to call their corresponding super implementations.
+     - Important: subclasses that need a custom initializer should override both `init(rawObject:)` and `init(asMeta:)`, and to call their corresponding super implementations.
      */
     public required init(asMeta: Void) {
         
@@ -93,18 +96,19 @@ open /*abstract*/ class CoreStoreObject: DynamicObject, Hashable {
         }
         if lhs.isMeta {
             
-            return type(of: lhs) == type(of: rhs)
+            return lhs.runtimeType() == rhs.runtimeType()
         }
         return lhs.rawObject!.isEqual(rhs.rawObject!)
     }
     
     
     // MARK: Hashable
-    
-    public var hashValue: Int {
-    
-        return ObjectIdentifier(self).hashValue
-            ^ (self.isMeta ? 0 : self.rawObject!.hashValue)
+
+    public func hash(into hasher: inout Hasher) {
+
+        hasher.combine(self.isMeta)
+        hasher.combine(ObjectIdentifier(self))
+        hasher.combine(self.rawObject)
     }
     
     
@@ -112,49 +116,113 @@ open /*abstract*/ class CoreStoreObject: DynamicObject, Hashable {
     
     internal let rawObject: CoreStoreManagedObject?
     internal let isMeta: Bool
+
+    internal class func metaProperties(includeSuperclasses: Bool) -> [PropertyProtocol] {
+
+        func keyPaths(_ allKeyPaths: inout [PropertyProtocol], for dynamicType: CoreStoreObject.Type) {
+
+            allKeyPaths.append(contentsOf: dynamicType.meta.propertyProtocolsByName())
+            guard
+                includeSuperclasses,
+                case let superType as CoreStoreObject.Type = (dynamicType as AnyClass).superclass(),
+                superType != CoreStoreObject.self
+                else {
+
+                    return
+            }
+            keyPaths(&allKeyPaths, for: superType)
+        }
+
+        var allKeyPaths: [PropertyProtocol] = []
+        keyPaths(&allKeyPaths, for: self)
+        return allKeyPaths
+    }
     
     
     // MARK: Private
     
-    private func initializeAttributes(_ mirror: Mirror, _ parentObject: CoreStoreObject) {
+    private func registerReceiver(mirror: Mirror, object: CoreStoreObject) {
         
-        _ = mirror.superclassMirror.flatMap({ self.initializeAttributes($0, parentObject) })
+        if let superclassMirror = mirror.superclassMirror {
+            
+            self.registerReceiver(
+                mirror: superclassMirror,
+                object: object
+            )
+        }
         for child in mirror.children {
             
             switch child.value {
                 
             case let property as AttributeProtocol:
-                property.parentObject = parentObject
+                property.rawObject = object.rawObject
                     
             case let property as RelationshipProtocol:
-                property.parentObject = parentObject
+                property.rawObject = object.rawObject
                 
             default:
                 continue
             }
         }
     }
+
+    private func propertyProtocolsByName() -> [PropertyProtocol] {
+
+        Internals.assert(self.isMeta, "'propertyProtocolsByName()' accessed from non-meta instance of \(Internals.typeName(self))")
+
+        let cacheKey = ObjectIdentifier(Self.self)
+        if let properties = Static.propertiesCache[cacheKey] {
+
+            return properties
+        }
+        let values: [PropertyProtocol] = Mirror(reflecting: self)
+            .children
+            .compactMap({ $0.value as? PropertyProtocol })
+        Static.propertiesCache[cacheKey] = values
+        return values
+    }
 }
 
 
 // MARK: - DynamicObject where Self: CoreStoreObject
 
-public extension DynamicObject where Self: CoreStoreObject {
+extension DynamicObject where Self: CoreStoreObject {
     
     /**
      Returns the `PartialObject` instance for the object, which acts as a fast, type-safe KVC interface for `CoreStoreObject`.
      */
     public func partialObject() -> PartialObject<Self> {
         
-        CoreStore.assert(
+        Internals.assert(
             !self.isMeta,
-            "Attempted to create a \(cs_typeName(PartialObject<Self>.self)) from a meta object. Meta objects are only used for querying keyPaths and infering types."
+            "Attempted to create a \(Internals.typeName(PartialObject<Self>.self)) from a meta object. Meta objects are only used for querying keyPaths and infering types."
         )
         return PartialObject<Self>(self.rawObject!)
     }
+
+
+    // MARK: Internal
     
     internal static var meta: Self {
         
-        return self.init(asMeta: ())
+        let cacheKey = ObjectIdentifier(self)
+        if case let meta as Self = Static.metaCache[cacheKey] {
+            
+            return meta
+        }
+        let meta = self.init(asMeta: ())
+        Static.metaCache[cacheKey] = meta
+        return meta
     }
+}
+
+
+// MARK: - Static
+
+fileprivate enum Static {
+    
+    // MARK: FilePrivate
+    
+    fileprivate static var metaCache: [ObjectIdentifier: Any] = [:]
+    fileprivate static var propertiesCache: [ObjectIdentifier: [PropertyProtocol]] = [:]
 }

@@ -2,7 +2,7 @@
 //  ListObserverTests.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import CoreStore
 
 // MARK: - ListObserverTests
 
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 class ListObserverTests: BaseTestDataTestCase {
     
     @objc
@@ -76,7 +76,7 @@ class ListObserverTests: BaseTestDataTestCase {
                     XCTAssertEqual(
                         ((note.userInfo as NSDictionary?) ?? [:]),
                         [
-                            "sectionInfo": monitor.sectionInfoAtIndex(0),
+                            "sectionInfo": monitor.sectionInfo(at: 0),
                             "sectionIndex": 0
                         ] as NSDictionary
                     )
@@ -178,9 +178,9 @@ class ListObserverTests: BaseTestDataTestCase {
             XCTAssertTrue(monitor.hasSections())
             XCTAssertEqual(monitor.numberOfSections(), 2)
             XCTAssertTrue(monitor.hasObjects())
-            XCTAssertTrue(monitor.hasObjectsInSection(0))
-            XCTAssertEqual(monitor.numberOfObjectsInSection(0), 2)
-            XCTAssertEqual(monitor.numberOfObjectsInSection(1), 3)
+            XCTAssertTrue(monitor.hasObjects(in: 0))
+            XCTAssertEqual(monitor.numberOfObjects(in: 0), 2)
+            XCTAssertEqual(monitor.numberOfObjects(in: 1), 3)
             
             var events = 0
             
@@ -268,7 +268,7 @@ class ListObserverTests: BaseTestDataTestCase {
             stack.perform(
                 asynchronous: { (transaction) -> Bool in
                     
-                    if let object = transaction.fetchOne(
+                    if let object = try transaction.fetchOne(
                         From<TestEntity1>(),
                         Where<TestEntity1>(#keyPath(TestEntity1.testEntityID), isEqualTo: 101)) {
                         
@@ -282,7 +282,7 @@ class ListObserverTests: BaseTestDataTestCase {
                         
                         XCTFail()
                     }
-                    if let object = transaction.fetchOne(
+                    if let object = try transaction.fetchOne(
                         From<TestEntity1>(),
                         Where<TestEntity1>(#keyPath(TestEntity1.testEntityID), isEqualTo: 102)) {
                         
@@ -394,7 +394,7 @@ class ListObserverTests: BaseTestDataTestCase {
             stack.perform(
                 asynchronous: { (transaction) -> Bool in
                     
-                    if let object = transaction.fetchOne(
+                    if let object = try transaction.fetchOne(
                         From<TestEntity1>(),
                         Where<TestEntity1>(#keyPath(TestEntity1.testEntityID), isEqualTo: 102)) {
                         
@@ -526,7 +526,7 @@ class ListObserverTests: BaseTestDataTestCase {
             stack.perform(
                 asynchronous: { (transaction) -> Bool in
                     
-                    let count = transaction.deleteAll(
+                    let count = try transaction.deleteAll(
                         From<TestEntity1>(),
                         Where<TestEntity1>(#keyPath(TestEntity1.testBoolean), isEqualTo: false)
                     )
@@ -551,7 +551,7 @@ class ListObserverTests: BaseTestDataTestCase {
 
 // MARK: TestListObserver
 
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 class TestListObserver: ListSectionObserver {
     
     // MARK: ListObserver

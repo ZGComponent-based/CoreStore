@@ -1,8 +1,9 @@
+// swift-tools-version:5.0
 //
 //  Package.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,21 +26,28 @@
 
 import PackageDescription
 
-let targets: [Target]
-#if os(iOS)
-targets = [Target(name: "CoreStore iOS")]
-#elseif os(OSX)
-targets = [Target(name: "CoreStore OSX")]
-#elseif os(watchOS)
-targets = [Target(name: "CoreStore watchOS")]
-#elseif os(tvOS)
-targets = [Target(name: "CoreStore tvOS")]
-#else
-targets = []
-#endif
-
 let package = Package(
     name: "CoreStore",
-    targets: targets,
-    exclude: ["Carthage", "CoreStoreDemo", "Sources/libA/images"]
+    platforms: [
+           .macOS(.v10_12), .iOS(.v10), .tvOS(.v10), .watchOS(.v3)
+    ],
+    products: [
+        .library(name: "CoreStore", type: .static, targets: ["CoreStore"])
+    ],
+    dependencies: [],
+    targets: [
+        .target(
+            name: "CoreStore",
+            dependencies: [],
+            path: "Sources",
+            exclude: ["CoreStoreBridge.h", "CoreStoreBridge.m"]
+        ),
+        .testTarget(
+            name: "CoreStoreTests",
+            dependencies: ["CoreStore"],
+            path: "CoreStoreTests",
+            exclude: ["BridgingTests.h", "BridgingTests.m"]
+        )
+    ],
+    swiftLanguageVersions: [.v5]
 )

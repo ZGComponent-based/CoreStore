@@ -2,7 +2,7 @@
 //  CSSelect.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -177,7 +177,7 @@ public final class CSSelectTerm: NSObject {
     
     public let bridgeToSwift: SelectTerm<NSManagedObject>
     
-    public init<D: NSManagedObject>(_ swiftValue: SelectTerm<D>) {
+    public init<O: NSManagedObject>(_ swiftValue: SelectTerm<O>) {
         
         self.bridgeToSwift = swiftValue.downcast()
         super.init()
@@ -187,7 +187,7 @@ public final class CSSelectTerm: NSObject {
 
 // MARK: - SelectTerm
 
-extension SelectTerm where D: NSManagedObject {
+extension SelectTerm where O: NSManagedObject {
     
     // MARK: CoreStoreSwiftType
     
@@ -377,13 +377,13 @@ public final class CSSelect: NSObject {
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
     // MARK: CoreStoreObjectiveCType
     
-    public init<D: NSManagedObject, T: QueryableAttributeType>(_ swiftValue: Select<D, T>) {
+    public init<O: NSManagedObject, T: QueryableAttributeType>(_ swiftValue: Select<O, T>) {
         
         self.attributeType = T.cs_rawAttributeType
         self.selectTerms = swiftValue.selectTerms.map({ $0.downcast() })
@@ -391,7 +391,7 @@ public final class CSSelect: NSObject {
         super.init()
     }
     
-    public init<D: NSManagedObject, T>(_ swiftValue: Select<D, T>) {
+    public init<O: NSManagedObject, T>(_ swiftValue: Select<O, T>) {
         
         self.attributeType = .undefinedAttributeType
         self.selectTerms = swiftValue.selectTerms.map({ $0.downcast() })
@@ -467,9 +467,9 @@ public final class CSSelect: NSObject {
                 }
                 else {
                     
-                    CoreStore.log(
+                    Internals.log(
                         .warning,
-                        message: "The key path \"\(keyPath)\" could not be resolved in entity \(cs_typeName(entityDescription.managedObjectClassName)) as an attribute and will be ignored by \(cs_typeName(self)) query clause."
+                        message: "The key path \"\(keyPath)\" could not be resolved in entity \(Internals.typeName(entityDescription.managedObjectClassName)) as an attribute and will be ignored by \(Internals.typeName(self)) query clause."
                     )
                 }
                 
@@ -502,7 +502,7 @@ public final class CSSelect: NSObject {
 
 // MARK: - Select
 
-extension Select where D: NSManagedObject {
+extension Select where O: NSManagedObject {
     
     // MARK: CoreStoreSwiftType
     

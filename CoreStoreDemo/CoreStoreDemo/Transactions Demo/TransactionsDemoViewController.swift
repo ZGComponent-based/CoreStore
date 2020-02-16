@@ -3,10 +3,11 @@
 //  CoreStoreDemo
 //
 //  Created by John Rommel Estropia on 2015/05/24.
-//  Copyright © 2015 John Rommel Estropia. All rights reserved.
+//  Copyright © 2018 John Rommel Estropia. All rights reserved.
 //
 
 import UIKit
+import Contacts
 import CoreLocation
 import MapKit
 import AddressBookUI
@@ -14,10 +15,12 @@ import CoreStore
 
 
 private struct Static {
-    
+
+    static let dataStack = DataStack()
+
     static let placeController: ObjectMonitor<Place> = {
         
-        try! CoreStore.addStorageAndWait(
+        try! Static.dataStack.addStorageAndWait(
             SQLiteStore(
                 fileName: "PlaceDemo.sqlite",
                 configuration: "TransactionsDemo",
@@ -25,20 +28,20 @@ private struct Static {
             )
         )
         
-        var place = CoreStore.fetchOne(From<Place>())
+        var place = try! Static.dataStack.fetchOne(From<Place>())
         if place == nil {
             
-            _ = try? CoreStore.perform(
+            _ = try? Static.dataStack.perform(
                 synchronous: { (transaction) in
                     
                     let place = transaction.create(Into<Place>())
                     place.setInitialValues()
                 }
             )
-            place = CoreStore.fetchOne(From<Place>())
+            place = try! Static.dataStack.fetchOne(From<Place>())
         }
         
-        return CoreStore.monitorObject(place!)
+        return Static.dataStack.monitorObject(place!)
     }()
 }
 
@@ -169,7 +172,7 @@ class TransactionsDemoViewController: UIViewController, MKMapViewDelegate, Objec
                 gesture.location(in: mapView),
                 toCoordinateFrom: mapView
             )
-            CoreStore.perform(
+            Static.dataStack.perform(
                 asynchronous: { (transaction) in
                     
                     let place = transaction.edit(Static.placeController.object)
@@ -182,7 +185,7 @@ class TransactionsDemoViewController: UIViewController, MKMapViewDelegate, Objec
     
     @IBAction dynamic func refreshButtonTapped(_ sender: AnyObject?) {
         
-        _ = try? CoreStore.perform(
+        _ = try? Static.dataStack.perform(
             synchronous: { (transaction) in
                 
                 let place = transaction.edit(Static.placeController.object)
@@ -193,7 +196,7 @@ class TransactionsDemoViewController: UIViewController, MKMapViewDelegate, Objec
     
     func geocode(place: Place) {
         
-        let transaction = CoreStore.beginUnsafe()
+        let transaction = Static.dataStack.beginUnsafe()
         
         self.geocoder?.cancelGeocode()
         
@@ -203,11 +206,23 @@ class TransactionsDemoViewController: UIViewController, MKMapViewDelegate, Objec
             CLLocation(latitude: place.latitude, longitude: place.longitude),
             completionHandler: { [weak self] (placemarks, error) -> Void in
                 
-                if let placemark = placemarks?.first, let addressDictionary = placemark.addressDictionary {
+                if let placemark = placemarks?.first, let dictionary = placemark.addressDictionary {
                     
                     let place = transaction.edit(Static.placeController.object)
                     place?.title = placemark.name
-                    place?.subtitle = ABCreateStringWithAddressDictionary(addressDictionary, true)
+                    place?.subtitle = CNPostalAddressFormatter.string(
+                        from: autoreleasepool {
+                            
+                            let address = CNMutablePostalAddress()
+                            (dictionary["Street"] as? String).flatMap({ address.street = $0 })
+                            (dictionary["State"] as? String).flatMap({ address.state = $0 })
+                            (dictionary["City"] as? String).flatMap({ address.city = $0 })
+                            (dictionary["Country"] as? String).flatMap({ address.country = $0 })
+                            (dictionary["ZIP"] as? String).flatMap({ address.postalCode = $0 })
+                            return address
+                        },
+                        style: .mailingAddress
+                    )
                     transaction.commit { (_) -> Void in }
                 }
                 

@@ -2,7 +2,7 @@
 //  QueryChainBuilder.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -39,16 +39,22 @@ import CoreData
  )
  ```
  */
-public struct QueryChainBuilder<D: DynamicObject, R: SelectResultType>: QueryChainableBuilderType {
+public struct QueryChainBuilder<O: DynamicObject, R: SelectResultType>: QueryChainableBuilderType {
     
     // MARK: QueryChainableBuilderType
     
-    public typealias ObjectType = D
+    public typealias ObjectType = O
     public typealias ResultType = R
     
-    public var from: From<D>
-    public var select: Select<D, R>
+    public var from: From<O>
+    public var select: Select<O, R>
     public var queryClauses: [QueryClause] = []
+    
+    
+    // MARK: Deprecated
+
+    @available(*, deprecated, renamed: "O")
+    public typealias D = O
 }
 
 

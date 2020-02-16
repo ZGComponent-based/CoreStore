@@ -2,7 +2,7 @@
 //  CoreDataNativeType.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import CoreData
  Objective-C Foundation types that are natively supported by Core Data managed attributes all conform to `CoreDataNativeType`.
  */
 @objc
-public protocol CoreDataNativeType: class, NSObjectProtocol {}
+public protocol CoreDataNativeType: AnyObject, NSObjectProtocol {}
 
 
 // MARK: - NSNumber

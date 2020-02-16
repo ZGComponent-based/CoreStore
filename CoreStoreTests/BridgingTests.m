@@ -2,7 +2,7 @@
 //  BridgingTests.m
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,10 @@
 #import "CoreStoreTests-Swift.h"
 
 @import CoreData;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 
 // MARK: - BridgingTests
 
@@ -168,14 +172,8 @@
                               versionChain:nil];
     XCTAssertNotNil(dataStack);
     
-    [CSCoreStore setDefaultStack:dataStack];
-    XCTAssertTrue([dataStack isEqual:[CSCoreStore defaultStack]]);
-}
-
-- (void)test_ThatStorages_BridgeCorrectly {
-    
     NSError *memoryError;
-    CSInMemoryStore *memoryStorage = [CSCoreStore
+    CSInMemoryStore *memoryStorage = [dataStack
                                       addInMemoryStorageAndWait:[CSInMemoryStore new]
                                       error:&memoryError];
     XCTAssertNotNil(memoryStorage);
@@ -186,30 +184,41 @@
     XCTAssertNil(memoryError);
     
     NSError *sqliteError;
-    CSSQLiteStore *sqliteStorage = [CSCoreStore
+    CSSQLiteStore *sqliteStorage = [dataStack
                                     addSQLiteStorageAndWait:[CSSQLiteStore new]
                                     error:&sqliteError];
     XCTAssertNotNil(sqliteStorage);
     XCTAssertEqualObjects([[sqliteStorage class] storeType], [CSSQLiteStore storeType]);
     XCTAssertEqualObjects([[sqliteStorage class] storeType], NSSQLiteStoreType);
     XCTAssertNil(sqliteStorage.configuration);
-    XCTAssertEqualObjects(sqliteStorage.storeOptions, @{ NSSQLitePragmasOption: @{ @"journal_mode": @"WAL" } });
+    NSDictionary *storeOptions;
+    if (@available(iOS 11.0, macOS 10.13, tvOS 11.0, *)) {
+        
+        storeOptions = @{ NSSQLitePragmasOption: @{ @"journal_mode": @"WAL" },
+                          NSBinaryStoreInsecureDecodingCompatibilityOption: @YES };
+    }
+    else {
+        
+        storeOptions = @{ NSSQLitePragmasOption: @{ @"journal_mode": @"WAL" }};
+    }
+    XCTAssertEqualObjects(sqliteStorage.storeOptions, storeOptions);
     XCTAssertNil(sqliteError);
 }
 
 - (void)test_ThatTransactions_BridgeCorrectly {
-    
-    [CSCoreStore
-     setDefaultStack:[[CSDataStack alloc]
-                      initWithXcodeModelName:@"Model"
-                      bundle:[NSBundle bundleForClass:[self class]]
-                      versionChain:nil]];
-    [CSCoreStore
+
+    CSDataStack *dataStack = [[CSDataStack alloc]
+                              initWithXcodeModelName:@"Model"
+                              bundle:[NSBundle bundleForClass:[self class]]
+                              versionChain:nil];
+    XCTAssertNotNil(dataStack);
+
+    [dataStack
      addInMemoryStorageAndWait:[CSInMemoryStore new]
      error:nil];
     
     {
-        CSUnsafeDataTransaction *transaction = [CSCoreStore beginUnsafe];
+        CSUnsafeDataTransaction *transaction = [dataStack beginUnsafe];
         XCTAssertNotNil(transaction);
         XCTAssert([transaction isKindOfClass:[CSUnsafeDataTransaction class]]);
         NSError *error;
@@ -220,23 +229,24 @@
     {
         XCTestExpectation *expectation = [self expectationWithDescription:@"sync"];
         NSError *error;
-        BOOL result = [CSCoreStore
+        BOOL result =
+        [dataStack
          beginSynchronous:^(CSSynchronousDataTransaction * _Nonnull transaction) {
-             
-             XCTAssertNotNil(transaction);
-             XCTAssert([transaction isKindOfClass:[CSSynchronousDataTransaction class]]);
-             NSError *error;
-             XCTAssertTrue([transaction commitAndWaitWithError:&error]);
-             XCTAssertNil(error);
-             [expectation fulfill];
-         }
-                       error:&error];
+
+            XCTAssertNotNil(transaction);
+            XCTAssert([transaction isKindOfClass:[CSSynchronousDataTransaction class]]);
+            NSError *error;
+            XCTAssertTrue([transaction commitAndWaitWithError:&error]);
+            XCTAssertNil(error);
+            [expectation fulfill];
+        }
+         error:&error];
         XCTAssertTrue(result);
         XCTAssertNil(error);
     }
     {
         XCTestExpectation *expectation = [self expectationWithDescription:@"async"];
-        [CSCoreStore beginAsynchronous:^(CSAsynchronousDataTransaction * _Nonnull transaction) {
+        [dataStack beginAsynchronous:^(CSAsynchronousDataTransaction * _Nonnull transaction) {
             
             XCTAssertNotNil(transaction);
             XCTAssert([transaction isKindOfClass:[CSAsynchronousDataTransaction class]]);
@@ -255,3 +265,5 @@
 }
 
 @end
+
+#pragma clang diagnostic pop

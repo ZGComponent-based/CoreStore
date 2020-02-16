@@ -2,7 +2,7 @@
 //  CSListMonitor.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ import CoreData
  
  - SeeAlso: `ListMonitor`
  */
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 @objc
 public final class CSListMonitor: NSObject {
     
@@ -132,7 +132,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func hasObjectsInSection(_ section: Int) -> Bool {
         
-        return self.bridgeToSwift.hasObjectsInSection(section)
+        return self.bridgeToSwift.hasObjects(in: section)
     }
     
     /**
@@ -155,7 +155,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func objectsInSection(_ section: Int) -> [NSManagedObject] {
         
-        return self.bridgeToSwift.objectsInSection(section)
+        return self.bridgeToSwift.objects(in: section)
     }
     
     /**
@@ -167,7 +167,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func objectsInSafeSection(safeSectionIndex section: Int) -> [NSManagedObject]? {
         
-        return self.bridgeToSwift.objectsInSection(safeSectionIndex: section)
+        return self.bridgeToSwift.objects(safelyIn: section)
     }
 
     /**
@@ -201,7 +201,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func numberOfObjectsInSection(_ section: Int) -> Int {
         
-        return self.bridgeToSwift.numberOfObjectsInSection(section)
+        return self.bridgeToSwift.numberOfObjects(in: section)
     }
     
     /**
@@ -214,7 +214,7 @@ public final class CSListMonitor: NSObject {
     public func numberOfObjectsInSafeSection(safeSectionIndex section: Int) -> NSNumber? {
         
         return self.bridgeToSwift
-            .numberOfObjectsInSection(safeSectionIndex: section)
+            .numberOfObjects(safelyIn: section)
             .flatMap { NSNumber(value: $0) }
     }
     
@@ -227,7 +227,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func sectionInfoAtIndex(_ section: Int) -> NSFetchedResultsSectionInfo {
         
-        return self.bridgeToSwift.sectionInfoAtIndex(section)
+        return self.bridgeToSwift.sectionInfo(at: section)
     }
     
     /**
@@ -239,7 +239,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func sectionInfoAtSafeSectionIndex(safeSectionIndex section: Int) -> NSFetchedResultsSectionInfo? {
         
-        return self.bridgeToSwift.sectionInfoAtIndex(safeSectionIndex: section)
+        return self.bridgeToSwift.sectionInfo(safelyAt: section)
     }
     
     /**
@@ -263,7 +263,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func targetSectionForSectionIndexTitle(title: String, index: Int) -> Int {
         
-        return self.bridgeToSwift.targetSectionForSectionIndex(title: title, index: index)
+        return self.bridgeToSwift.targetSection(forSectionIndexTitle: title, at: index)
     }
     
     /**
@@ -287,7 +287,7 @@ public final class CSListMonitor: NSObject {
     public func indexOf(_ object: NSManagedObject) -> NSNumber? {
         
         return self.bridgeToSwift
-            .indexOf(object)
+            .index(of: object)
             .flatMap { NSNumber(value: $0) }
     }
     
@@ -300,7 +300,7 @@ public final class CSListMonitor: NSObject {
     @objc
     public func indexPathOf(_ object: NSManagedObject) -> IndexPath? {
         
-        return self.bridgeToSwift.indexPathOf(object)
+        return self.bridgeToSwift.indexPath(of: object)
     }
     
     
@@ -495,14 +495,15 @@ public final class CSListMonitor: NSObject {
      
      `refetch(...)` broadcasts `listMonitorWillRefetch(...)` to its observers immediately, and then `listMonitorDidRefetch(...)` after the new fetch request completes.
      
-     - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses. Note that only specified clauses will be changed; unspecified clauses will use previous values.
+     - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
+     - Important: Starting CoreStore 4.0, all `CSFetchClause`s required by the `CSListMonitor` should be provided in the arguments list of `refetch(...)`.
      */
     @objc
     public func refetch(_ fetchClauses: [CSFetchClause]) {
         
         self.bridgeToSwift.refetch { (fetchRequest) in
             
-            fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest as! NSFetchRequest<NSFetchRequestResult>) }
+            fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
         }
     }
     
@@ -525,7 +526,7 @@ public final class CSListMonitor: NSObject {
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -545,7 +546,7 @@ public final class CSListMonitor: NSObject {
 
 // MARK: - ListMonitor
 
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 extension ListMonitor where ListMonitor.ObjectType: NSManagedObject {
     
     // MARK: CoreStoreSwiftType

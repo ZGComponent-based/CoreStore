@@ -2,7 +2,7 @@
 //  CoreStoreLogger.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ public enum LogLevel {
 // MARK: - CoreStoreLogger
 
 /**
- Custom loggers should implement the `CoreStoreLogger` protocol and pass its instance to `CoreStore.logger`. Calls to `log(...)`, `assert(...)`, and `abort(...)` are not tied to a specific queue/thread, so it is the implementer's job to handle thread-safety.
+ Custom loggers should implement the `CoreStoreLogger` protocol and pass its instance to `CoreStoreDefaults.logger`. Calls to `log(...)`, `assert(...)`, and `abort(...)` are not tied to a specific queue/thread, so it is the implementer's job to handle thread-safety.
  */
 public protocol CoreStoreLogger {
     

@@ -2,7 +2,7 @@
 //  SectionMonitorBuilder.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -40,14 +40,20 @@ import CoreData
  )
  ```
  */
-@available(OSX 10.12, *)
-public struct SectionMonitorChainBuilder<D: DynamicObject>: SectionMonitorBuilderType {
+@available(macOS 10.12, *)
+public struct SectionMonitorChainBuilder<O: DynamicObject>: SectionMonitorBuilderType {
     
     // MARK: SectionMonitorBuilderType
     
-    public var from: From<D>
-    public var sectionBy: SectionBy<D>
+    public var from: From<O>
+    public var sectionBy: SectionBy<O>
     public var fetchClauses: [FetchClause] = []
+    
+    
+    // MARK: Deprecated
+
+    @available(*, deprecated, renamed: "O")
+    public typealias D = O
 }
 
 
@@ -56,7 +62,7 @@ public struct SectionMonitorChainBuilder<D: DynamicObject>: SectionMonitorBuilde
 /**
  Utility protocol for `SectionMonitorChainBuilder`. Used in methods that support chained fetch builders.
  */
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 public protocol SectionMonitorBuilderType {
     
     /**

@@ -2,7 +2,7 @@
 //  Select.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -52,12 +52,12 @@ public protocol SelectAttributesResultType: SelectResultType {
 /**
  The `SelectTerm` is passed to the `Select` clause to indicate the attributes/aggregate keys to be queried.
  */
-public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
+public enum SelectTerm<O: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     
     /**
      Provides a `SelectTerm` to a `Select` clause for querying an entity attribute. A shorter way to do the same is to assign from the string keypath directly:
      ```
-     let fullName = CoreStore.queryValue(
+     let fullName = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<String>(.attribute("fullName")),
          Where("employeeID", isEqualTo: 1111)
@@ -65,7 +65,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      ```
      is equivalent to:
      ```
-     let fullName = CoreStore.queryValue(
+     let fullName = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<String>("fullName"),
          Where("employeeID", isEqualTo: 1111)
@@ -74,7 +74,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter keyPath: the attribute name
      - returns: a `SelectTerm` to a `Select` clause for querying an entity attribute
      */
-    public static func attribute(_ keyPath: KeyPathString) -> SelectTerm<D> {
+    public static func attribute(_ keyPath: KeyPathString) -> SelectTerm<O> {
         
         return ._attribute(keyPath)
     }
@@ -82,7 +82,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     /**
      Provides a `SelectTerm` to a `Select` clause for querying the average value of an attribute.
      ```
-     let averageAge = CoreStore.queryValue(
+     let averageAge = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<Int>(.average("age"))
      )
@@ -91,7 +91,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "average(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the average value of an attribute
      */
-    public static func average(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func average(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return ._aggregate(
             function: "average:",
@@ -104,7 +104,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     /**
      Provides a `SelectTerm` to a `Select` clause for a count query.
      ```
-     let numberOfEmployees = CoreStore.queryValue(
+     let numberOfEmployees = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<Int>(.count("employeeID"))
      )
@@ -113,7 +113,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "count(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for a count query
      */
-    public static func count(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func count(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return ._aggregate(
             function: "count:",
@@ -126,7 +126,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     /**
      Provides a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute.
      ```
-     let maximumAge = CoreStore.queryValue(
+     let maximumAge = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<Int>(.maximum("age"))
      )
@@ -135,7 +135,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "max(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute
      */
-    public static func maximum(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func maximum(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return ._aggregate(
             function: "max:",
@@ -148,7 +148,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     /**
      Provides a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute.
      ```
-     let minimumAge = CoreStore.queryValue(
+     let minimumAge = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<Int>(.minimum("age"))
      )
@@ -157,7 +157,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "min(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute
      */
-    public static func minimum(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func minimum(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return ._aggregate(
             function: "min:",
@@ -170,7 +170,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     /**
      Provides a `SelectTerm` to a `Select` clause for querying the sum value for an attribute.
      ```
-     let totalAge = CoreStore.queryValue(
+     let totalAge = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<Int>(.sum("age"))
      )
@@ -179,7 +179,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "sum(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func sum(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func sum(_ keyPath: KeyPathString, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return ._aggregate(
             function: "sum:",
@@ -192,7 +192,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     /**
      Provides a `SelectTerm` to a `Select` clause for querying the `NSManagedObjectID`.
      ```
-     let objectID = CoreStore.queryValue(
+     let objectID = dataStack.queryValue(
          From<MyPersonEntity>(),
          Select<NSManagedObjectID>(),
          Where("employeeID", isEqualTo: 1111)
@@ -202,7 +202,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "objecID" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func objectID(as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func objectID(as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return ._identity(
             alias: alias ?? "objectID",
@@ -231,7 +231,7 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     
     // MARK: Equatable
     
-    public static func == (lhs: SelectTerm<D>, rhs: SelectTerm<D>) -> Bool {
+    public static func == (lhs: SelectTerm<O>, rhs: SelectTerm<O>) -> Bool {
         
         switch (lhs, rhs) {
             
@@ -257,19 +257,26 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
     
     
     // MARK: Hashable
-    
-    public var hashValue: Int {
-        
+
+    public func hash(into hasher: inout Hasher) {
+
         switch self {
             
         case ._attribute(let keyPath):
-            return 0 ^ keyPath.hashValue
+            hasher.combine(0)
+            hasher.combine(keyPath)
             
         case ._aggregate(let function, let keyPath, let alias, let nativeType):
-            return 1 ^ function.hashValue ^ keyPath.hashValue ^ alias.hashValue ^ nativeType.hashValue
+            hasher.combine(1)
+            hasher.combine(function)
+            hasher.combine(keyPath)
+            hasher.combine(alias)
+            hasher.combine(nativeType)
             
         case ._identity(let alias, let nativeType):
-            return 3 ^ alias.hashValue ^ nativeType.hashValue
+            hasher.combine(2)
+            hasher.combine(alias)
+            hasher.combine(nativeType)
         }
     }
     
@@ -289,16 +296,25 @@ public enum SelectTerm<D: DynamicObject>: ExpressibleByStringLiteral, Hashable {
         case ._identity(let alias, _):          return alias
         }
     }
+    
+    
+    // MARK: Deprecated
+
+    @available(*, deprecated, renamed: "O")
+    public typealias D = O
 }
 
-extension SelectTerm where D: NSManagedObject {
+
+// MARK: - SelectTerm where O: NSManagedObject
+
+extension SelectTerm where O: NSManagedObject {
     
     /**
      Provides a `SelectTerm` to a `Select` clause for querying an entity attribute.
      - parameter keyPath: the attribute name
      - returns: a `SelectTerm` to a `Select` clause for querying an entity attribute
      */
-    public static func attribute<V>(_ keyPath: KeyPath<D, V>) -> SelectTerm<D> {
+    public static func attribute<V>(_ keyPath: KeyPath<O, V>) -> SelectTerm<O> {
         
         return self.attribute(keyPath._kvcKeyPathString!)
     }
@@ -309,7 +325,7 @@ extension SelectTerm where D: NSManagedObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "average(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the average value of an attribute
      */
-    public static func average<V>(_ keyPath: KeyPath<D, V>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func average<V>(_ keyPath: KeyPath<O, V>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return self.average(keyPath._kvcKeyPathString!, as: alias)
     }
@@ -320,7 +336,7 @@ extension SelectTerm where D: NSManagedObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "count(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for a count query
      */
-    public static func count<V>(_ keyPath: KeyPath<D, V>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func count<V>(_ keyPath: KeyPath<O, V>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return self.count(keyPath._kvcKeyPathString!, as: alias)
     }
@@ -331,7 +347,7 @@ extension SelectTerm where D: NSManagedObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "max(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute
      */
-    public static func maximum<V>(_ keyPath: KeyPath<D, V>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func maximum<V>(_ keyPath: KeyPath<O, V>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return self.maximum(keyPath._kvcKeyPathString!, as: alias)
     }
@@ -342,7 +358,7 @@ extension SelectTerm where D: NSManagedObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "min(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute
      */
-    public static func minimum<V>(_ keyPath: KeyPath<D, V>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func minimum<V>(_ keyPath: KeyPath<O, V>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return self.minimum(keyPath._kvcKeyPathString!, as: alias)
     }
@@ -353,22 +369,25 @@ extension SelectTerm where D: NSManagedObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "sum(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func sum<V>(_ keyPath: KeyPath<D, V>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func sum<V>(_ keyPath: KeyPath<O, V>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
         return self.sum(keyPath._kvcKeyPathString!, as: alias)
     }
 }
 
-extension SelectTerm where D: CoreStoreObject {
+
+// MARK: - SelectTerm where O: CoreStoreObject
+
+extension SelectTerm where O: CoreStoreObject {
     
     /**
      Provides a `SelectTerm` to a `Select` clause for querying an entity attribute.
      - parameter keyPath: the attribute name
      - returns: a `SelectTerm` to a `Select` clause for querying an entity attribute
      */
-    public static func attribute<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Required<V>>) -> SelectTerm<D> {
+    public static func attribute<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>) -> SelectTerm<O> {
         
-        return self.attribute(D.meta[keyPath: keyPath].keyPath)
+        return self.attribute(O.meta[keyPath: keyPath].keyPath)
     }
     
     /**
@@ -376,9 +395,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter keyPath: the attribute name
      - returns: a `SelectTerm` to a `Select` clause for querying an entity attribute
      */
-    public static func attribute<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Optional<V>>) -> SelectTerm<D> {
+    public static func attribute<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>) -> SelectTerm<O> {
         
-        return self.attribute(D.meta[keyPath: keyPath].keyPath)
+        return self.attribute(O.meta[keyPath: keyPath].keyPath)
     }
     
     /**
@@ -386,9 +405,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter keyPath: the attribute name
      - returns: a `SelectTerm` to a `Select` clause for querying an entity attribute
      */
-    public static func attribute<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Required<V>>) -> SelectTerm<D> {
+    public static func attribute<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Required<V>>) -> SelectTerm<O> {
         
-        return self.attribute(D.meta[keyPath: keyPath].keyPath)
+        return self.attribute(O.meta[keyPath: keyPath].keyPath)
     }
     
     /**
@@ -396,9 +415,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter keyPath: the attribute name
      - returns: a `SelectTerm` to a `Select` clause for querying an entity attribute
      */
-    public static func attribute<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Optional<V>>) -> SelectTerm<D> {
+    public static func attribute<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Optional<V>>) -> SelectTerm<O> {
         
-        return self.attribute(D.meta[keyPath: keyPath].keyPath)
+        return self.attribute(O.meta[keyPath: keyPath].keyPath)
     }
     
     /**
@@ -407,9 +426,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "average(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the average value of an attribute
      */
-    public static func average<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func average<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.average(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.average(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -418,9 +437,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "average(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the average value of an attribute
      */
-    public static func average<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func average<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.average(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.average(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -429,9 +448,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "average(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the average value of an attribute
      */
-    public static func average<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func average<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.average(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.average(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -440,9 +459,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "average(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the average value of an attribute
      */
-    public static func average<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func average<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.average(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.average(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -451,10 +470,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "count(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for a count query
      */
-    public static func count<V>(_ keyPath: KeyPath<D,
-        ValueContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func count<V>(_ keyPath: KeyPath<O,
+        ValueContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.count(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.count(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -463,10 +482,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "count(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for a count query
      */
-    public static func count<V>(_ keyPath: KeyPath<D,
-        ValueContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func count<V>(_ keyPath: KeyPath<O,
+        ValueContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.count(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.count(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -475,10 +494,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "count(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for a count query
      */
-    public static func count<V>(_ keyPath: KeyPath<D,
-        TransformableContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func count<V>(_ keyPath: KeyPath<O,
+        TransformableContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.count(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.count(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -487,10 +506,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "count(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for a count query
      */
-    public static func count<V>(_ keyPath: KeyPath<D,
-        TransformableContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func count<V>(_ keyPath: KeyPath<O,
+        TransformableContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.count(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.count(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -499,10 +518,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "max(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute
      */
-    public static func maximum<V>(_ keyPath: KeyPath<D,
-        ValueContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func maximum<V>(_ keyPath: KeyPath<O,
+        ValueContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.maximum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.maximum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -511,10 +530,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "max(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute
      */
-    public static func maximum<V>(_ keyPath: KeyPath<D,
-        ValueContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func maximum<V>(_ keyPath: KeyPath<O,
+        ValueContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.maximum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.maximum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -523,10 +542,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "max(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute
      */
-    public static func maximum<V>(_ keyPath: KeyPath<D,
-        TransformableContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func maximum<V>(_ keyPath: KeyPath<O,
+        TransformableContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.maximum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.maximum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -535,10 +554,10 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "max(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the maximum value for an attribute
      */
-    public static func maximum<V>(_ keyPath: KeyPath<D,
-        TransformableContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func maximum<V>(_ keyPath: KeyPath<O,
+        TransformableContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.maximum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.maximum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -547,9 +566,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "min(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute
      */
-    public static func minimum<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func minimum<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.minimum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.minimum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -558,9 +577,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "min(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute
      */
-    public static func minimum<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func minimum<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.minimum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.minimum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -569,9 +588,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "min(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute
      */
-    public static func minimum<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func minimum<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.minimum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.minimum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -580,9 +599,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "min(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the minimum value for an attribute
      */
-    public static func minimum<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func minimum<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.minimum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.minimum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -591,9 +610,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "sum(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func sum<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func sum<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.sum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.sum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -602,9 +621,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "sum(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func sum<V>(_ keyPath: KeyPath<D, ValueContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func sum<V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.sum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.sum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -613,9 +632,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "sum(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func sum<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func sum<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Required<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.sum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.sum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
     
     /**
@@ -624,9 +643,9 @@ extension SelectTerm where D: CoreStoreObject {
      - parameter alias: the dictionary key to use to access the result. Ignored when the query return value is not an `NSDictionary`. If `nil`, the default key "sum(<attributeName>)" is used
      - returns: a `SelectTerm` to a `Select` clause for querying the sum value for an attribute
      */
-    public static func sum<V>(_ keyPath: KeyPath<D, TransformableContainer<D>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<D> {
+    public static func sum<V>(_ keyPath: KeyPath<O, TransformableContainer<O>.Optional<V>>, as alias: KeyPathString? = nil) -> SelectTerm<O> {
         
-        return self.sum(D.meta[keyPath: keyPath].keyPath, as: alias)
+        return self.sum(O.meta[keyPath: keyPath].keyPath, as: alias)
     }
 }
 
@@ -638,14 +657,14 @@ extension SelectTerm where D: CoreStoreObject {
  
  You can bind the return type by specializing the initializer:
  ```
- let maximumAge = CoreStore.queryValue(
+ let maximumAge = dataStack.queryValue(
      From<MyPersonEntity>(),
      Select<Int>(.maximum("age"))
  )
  ```
  or by casting the type of the return value:
  ```
- let maximumAge: Int = CoreStore.queryValue(
+ let maximumAge: Int = dataStack.queryValue(
      From<MyPersonEntity>(),
      Select(.maximum("age"))
  )
@@ -659,7 +678,7 @@ extension SelectTerm where D: CoreStoreObject {
  
  - parameter sortDescriptors: a series of `NSSortDescriptor`s
  */
-public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hashable {
+public struct Select<O: DynamicObject, T: SelectResultType>: SelectClause, Hashable {
     
     /**
      Initializes a `Select` clause with a list of `SelectTerm`s
@@ -667,7 +686,7 @@ public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hasha
      - parameter selectTerm: a `SelectTerm`
      - parameter selectTerms: a series of `SelectTerm`s
      */
-    public init(_ selectTerm: SelectTerm<D>, _ selectTerms: SelectTerm<D>...) {
+    public init(_ selectTerm: SelectTerm<O>, _ selectTerms: SelectTerm<O>...) {
         
         self.selectTerms = [selectTerm] + selectTerms
     }
@@ -677,7 +696,7 @@ public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hasha
      
      - parameter selectTerms: a series of `SelectTerm`s
      */
-    public init(_ selectTerms: [SelectTerm<D>]) {
+    public init(_ selectTerms: [SelectTerm<O>]) {
         
         self.selectTerms = selectTerms
     }
@@ -685,7 +704,7 @@ public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hasha
     
     // MARK: Equatable
     
-    public static func == <T, U>(lhs: Select<D, T>, rhs: Select<D, U>) -> Bool {
+    public static func == <T, U>(lhs: Select<O, T>, rhs: Select<O, U>) -> Bool {
         
         return lhs.selectTerms == rhs.selectTerms
     }
@@ -693,23 +712,23 @@ public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hasha
     
     // MARK: SelectClause
     
-    public typealias ObjectType = D
+    public typealias ObjectType = O
     public typealias ReturnType = T
     
-    public let selectTerms: [SelectTerm<D>]
+    public let selectTerms: [SelectTerm<O>]
     
     
     // MARK: Hashable
-    
-    public var hashValue: Int {
-        
-        return self.selectTerms.map { $0.hashValue }.reduce(0, ^)
+
+    public func hash(into hasher: inout Hasher) {
+
+        hasher.combine(self.selectTerms)
     }
     
     
     // MARK: Internal
     
-    internal func applyToFetchRequest(_ fetchRequest: NSFetchRequest<NSFetchRequestResult>) {
+    internal func applyToFetchRequest(_ fetchRequest: NSFetchRequest<NSDictionary>) {
         
         fetchRequest.includesPendingChanges = false
         fetchRequest.resultType = .dictionaryResultType
@@ -768,9 +787,9 @@ public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hasha
                 }
                 else {
                     
-                    CoreStore.log(
+                    Internals.log(
                         .warning,
-                        message: "The key path \"\(keyPath)\" could not be resolved in entity \(cs_typeName(entityDescription.managedObjectClassName)) as an attribute and will be ignored by \(cs_typeName(self)) query clause."
+                        message: "The key path \"\(keyPath)\" could not be resolved in entity \(Internals.typeName(entityDescription.managedObjectClassName)) as an attribute and will be ignored by \(Internals.typeName(self)) query clause."
                     )
                 }
                 
@@ -793,9 +812,15 @@ public struct Select<D: DynamicObject, T: SelectResultType>: SelectClause, Hasha
         
         fetchRequest.propertiesToFetch = propertiesToFetch
     }
+    
+    
+    // MARK: Deprecated
+
+    @available(*, deprecated, renamed: "O")
+    public typealias D = O
 }
 
-public extension Select where T: NSManagedObjectID {
+extension Select where T: NSManagedObjectID {
     
     /**
      Initializes a `Select` that queries for `NSManagedObjectID` results
@@ -806,25 +831,25 @@ public extension Select where T: NSManagedObjectID {
     }
 }
 
-public extension Select where D: NSManagedObject {
+extension Select where O: NSManagedObject {
     
     /**
      Initializes a `Select` that queries the value of an attribute pertained by a keyPath
      - parameter keyPath: the keyPath for the attribute
      */
-    public init(_ keyPath: KeyPath<D, T>) {
+    public init(_ keyPath: KeyPath<O, T>) {
         
         self.init(.attribute(keyPath))
     }
 }
 
-public extension Select where D: CoreStoreObject, T: ImportableAttributeType {
+extension Select where O: CoreStoreObject, T: ImportableAttributeType {
     
     /**
      Initializes a `Select` that queries the value of an attribute pertained by a keyPath
      - parameter keyPath: the keyPath for the attribute
      */
-    public init(_ keyPath: KeyPath<D, ValueContainer<D>.Required<T>>) {
+    public init(_ keyPath: KeyPath<O, ValueContainer<O>.Required<T>>) {
         
         self.init(.attribute(keyPath))
     }
@@ -833,19 +858,19 @@ public extension Select where D: CoreStoreObject, T: ImportableAttributeType {
      Initializes a `Select` that queries the value of an attribute pertained by a keyPath
      - parameter keyPath: the keyPath for the attribute
      */
-    public init(_ keyPath: KeyPath<D, ValueContainer<D>.Optional<T>>) {
+    public init(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<T>>) {
         
         self.init(.attribute(keyPath))
     }
 }
 
-public extension Select where D: CoreStoreObject, T: ImportableAttributeType & NSCoding & NSCopying {
+extension Select where O: CoreStoreObject, T: ImportableAttributeType & NSCoding & NSCopying {
     
     /**
      Initializes a `Select` that queries the value of an attribute pertained by a keyPath
      - parameter keyPath: the keyPath for the attribute
      */
-    public init(_ keyPath: KeyPath<D, TransformableContainer<D>.Required<T>>) {
+    public init(_ keyPath: KeyPath<O, TransformableContainer<O>.Required<T>>) {
         
         self.init(.attribute(keyPath))
     }
@@ -854,7 +879,7 @@ public extension Select where D: CoreStoreObject, T: ImportableAttributeType & N
      Initializes a `Select` that queries the value of an attribute pertained by a keyPath
      - parameter keyPath: the keyPath for the attribute
      */
-    public init(_ keyPath: KeyPath<D, TransformableContainer<D>.Optional<T>>) {
+    public init(_ keyPath: KeyPath<O, TransformableContainer<O>.Optional<T>>) {
         
         self.init(.attribute(keyPath))
     }

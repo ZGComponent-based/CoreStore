@@ -2,7 +2,7 @@
 //  CSCoreStore+Observing.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,9 @@ import CoreData
 
 // MARK: - CSCoreStore
 
-@available(OSX 10.12, *)
-public extension CSCoreStore {
+@available(*, deprecated, message: "Call methods directly from the CSDataStack instead")
+@available(macOS 10.12, *)
+extension CSCoreStore {
     
     /**
      Using the `defaultStack`, creates an `CSObjectMonitor` for the specified `NSManagedObject`. Multiple `CSObjectObserver`s may then register themselves to be notified when changes are made to the `NSManagedObject`.

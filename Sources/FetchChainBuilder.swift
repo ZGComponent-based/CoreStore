@@ -2,7 +2,7 @@
 //  FetchChainBuilder.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -39,14 +39,20 @@ import CoreData
  )
  ```
  */
-public struct FetchChainBuilder<D: DynamicObject>: FetchChainableBuilderType {
+public struct FetchChainBuilder<O: DynamicObject>: FetchChainableBuilderType {
     
     // MARK: FetchChainableBuilderType
     
-    public typealias ObjectType = D
+    public typealias ObjectType = O
     
-    public var from: From<D>
+    public var from: From<O>
     public var fetchClauses: [FetchClause] = []
+    
+    
+    // MARK: Deprecated
+
+    @available(*, deprecated, renamed: "O")
+    public typealias D = O
 }
 
 

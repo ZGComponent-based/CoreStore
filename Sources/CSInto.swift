@@ -2,7 +2,7 @@
 //  CSInto.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -104,7 +104,7 @@ public final class CSInto: NSObject {
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -112,7 +112,7 @@ public final class CSInto: NSObject {
     
     public let bridgeToSwift: Into<NSManagedObject>
     
-    public required init<D: NSManagedObject>(_ swiftValue: Into<D>) {
+    public required init<O: NSManagedObject>(_ swiftValue: Into<O>) {
         
         self.bridgeToSwift = swiftValue.downcast()
         super.init()
@@ -122,7 +122,7 @@ public final class CSInto: NSObject {
 
 // MARK: - Into
 
-extension Into where D: NSManagedObject {
+extension Into where O: NSManagedObject {
     
     // MARK: CoreStoreSwiftType
     

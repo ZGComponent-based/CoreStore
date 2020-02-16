@@ -2,7 +2,7 @@
 //  CSDataStack+Migrating.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@ import CoreData
 
 // MARK: - CSDataStack
 
-public extension CSDataStack {
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
+extension CSDataStack {
     
     /**
      Asynchronously adds a `CSInMemoryStore` to the stack. Migrations are also initiated by default.

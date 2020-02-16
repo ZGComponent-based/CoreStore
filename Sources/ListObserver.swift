@@ -2,7 +2,7 @@
 //  ListObserver.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -32,15 +32,15 @@ import CoreData
 /**
  Implement the `ListObserver` protocol to observe changes to a list of `NSManagedObject`s. `ListObserver`s may register themselves to a `ListMonitor`'s `addObserver(_:)` method:
  ```
- let monitor = CoreStore.monitorList(
+ let monitor = dataStack.monitorList(
      From<Person>(),
      OrderBy(.ascending("lastName"))
  )
  monitor.addObserver(self)
  ```
  */
-@available(OSX 10.12, *)
-public protocol ListObserver: class {
+@available(macOS 10.12, *)
+public protocol ListObserver: AnyObject {
     
     /**
      The `NSManagedObject` type for the observed list
@@ -82,8 +82,8 @@ public protocol ListObserver: class {
 
 // MARK: - ListObserver (Default Implementations)
 
-@available(OSX 10.12, *)
-public extension ListObserver {
+@available(macOS 10.12, *)
+extension ListObserver {
     
     public func listMonitorWillChange(_ monitor: ListMonitor<ListEntityType>) { }
     
@@ -96,14 +96,14 @@ public extension ListObserver {
 /**
  Implement the `ListObjectObserver` protocol to observe detailed changes to a list's object. `ListObjectObserver`s may register themselves to a `ListMonitor`'s `addObserver(_:)` method:
  ```
- let monitor = CoreStore.monitorList(
+ let monitor = dataStack.monitorList(
      From<MyPersonEntity>(),
      OrderBy(.ascending("lastName"))
  )
  monitor.addObserver(self)
  ```
  */
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 public protocol ListObjectObserver: ListObserver {
     
     /**
@@ -151,8 +151,8 @@ public protocol ListObjectObserver: ListObserver {
 
 // MARK: - ListObjectObserver (Default Implementations)
 
-@available(OSX 10.12, *)
-public extension ListObjectObserver {
+@available(macOS 10.12, *)
+extension ListObjectObserver {
     
     public func listMonitor(_ monitor: ListMonitor<ListEntityType>, didInsertObject object: ListEntityType, toIndexPath indexPath: IndexPath) { }
     
@@ -169,7 +169,7 @@ public extension ListObjectObserver {
 /**
  Implement the `ListSectionObserver` protocol to observe changes to a list's section info. `ListSectionObserver`s may register themselves to a `ListMonitor`'s `addObserver(_:)` method:
  ```
- let monitor = CoreStore.monitorSectionedList(
+ let monitor = dataStack.monitorSectionedList(
      From<MyPersonEntity>(),
      SectionBy("age") { "Age \($0)" },
      OrderBy(.ascending("lastName"))
@@ -177,7 +177,7 @@ public extension ListObjectObserver {
  monitor.addObserver(self)
  ```
  */
-@available(OSX 10.12, *)
+@available(macOS 10.12, *)
 public protocol ListSectionObserver: ListObjectObserver {
     
     /**
@@ -204,8 +204,8 @@ public protocol ListSectionObserver: ListObjectObserver {
 
 // MARK: - ListSectionObserver (Default Implementations)
 
-@available(OSX 10.12, *)
-public extension ListSectionObserver {
+@available(macOS 10.12, *)
+extension ListSectionObserver {
     
     public func listMonitor(_ monitor: ListMonitor<ListEntityType>, didInsertSection sectionInfo: NSFetchedResultsSectionInfo, toSectionIndex sectionIndex: Int) { }
     

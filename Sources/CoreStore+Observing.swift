@@ -2,7 +2,7 @@
 //  CoreStore+Observing.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,48 +29,49 @@ import CoreData
 
 // MARK: - CoreStore
 
-@available(OSX 10.12, *)
-public extension CoreStore {
+@available(*, deprecated, message: "Call methods directly from the DataStack instead")
+@available(macOS 10.12, *)
+extension CoreStore {
     
     /**
-     Using the `defaultStack`, creates an `ObjectMonitor` for the specified `DynamicObject`. Multiple `ObjectObserver`s may then register themselves to be notified when changes are made to the `DynamicObject`.
+     Using the `CoreStoreDefaults.dataStack`, creates an `ObjectMonitor` for the specified `DynamicObject`. Multiple `ObjectObserver`s may then register themselves to be notified when changes are made to the `DynamicObject`.
      
      - parameter object: the `DynamicObject` to observe changes from
-     - returns: a `ObjectMonitor` that monitors changes to `object`
+     - returns: an `ObjectMonitor` that monitors changes to `object`
      */
-    public static func monitorObject<D>(_ object: D) -> ObjectMonitor<D> {
+    public static func monitorObject<O: DynamicObject>(_ object: O) -> ObjectMonitor<O> {
         
-        return self.defaultStack.monitorObject(object)
+        return CoreStoreDefaults.dataStack.monitorObject(object)
     }
     
     /**
-     Using the `defaultStack`, creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
+     Using the `CoreStoreDefaults.dataStack`, creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
      
      - parameter from: a `From` clause indicating the entity type
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      - returns: a `ListMonitor` instance that monitors changes to the list
      */
-    public static func monitorList<D>(_ from: From<D>, _ fetchClauses: FetchClause...) -> ListMonitor<D> {
+    public static func monitorList<O>(_ from: From<O>, _ fetchClauses: FetchClause...) -> ListMonitor<O> {
         
-        return self.defaultStack.monitorList(from, fetchClauses)
+        return CoreStoreDefaults.dataStack.monitorList(from, fetchClauses)
     }
     
     /**
-     Using the `defaultStack`, creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
+     Using the `CoreStoreDefaults.dataStack`, creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
      
      - parameter from: a `From` clause indicating the entity type
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      - returns: a `ListMonitor` instance that monitors changes to the list
      */
-    public static func monitorList<D>(_ from: From<D>, _ fetchClauses: [FetchClause]) -> ListMonitor<D> {
+    public static func monitorList<O>(_ from: From<O>, _ fetchClauses: [FetchClause]) -> ListMonitor<O> {
         
-        return self.defaultStack.monitorList(from, fetchClauses)
+        return CoreStoreDefaults.dataStack.monitorList(from, fetchClauses)
     }
     
     /**
      Creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified `FetchChainableBuilderType` built from a chain of clauses.
      ```
-     let monitor = CoreStore.monitorList(
+     let monitor = dataStack.monitorList(
          From<MyPersonEntity>()
              .where(\.age > 18)
              .orderBy(.ascending(\.age))
@@ -81,39 +82,39 @@ public extension CoreStore {
      */
     public static func monitorList<B: FetchChainableBuilderType>(_ clauseChain: B) -> ListMonitor<B.ObjectType> {
         
-        return self.defaultStack.monitorList(clauseChain.from, clauseChain.fetchClauses)
+        return CoreStoreDefaults.dataStack.monitorList(clauseChain.from, clauseChain.fetchClauses)
     }
     
     /**
-     Using the `defaultStack`, asynchronously creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
+     Using the `CoreStoreDefaults.dataStack`, asynchronously creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
      
      - parameter createAsynchronously: the closure that receives the created `ListMonitor` instance
      - parameter from: a `From` clause indicating the entity type
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      */
-    public static func monitorList<D>(createAsynchronously: @escaping (ListMonitor<D>) -> Void, _ from: From<D>, _ fetchClauses: FetchClause...) {
+    public static func monitorList<O>(createAsynchronously: @escaping (ListMonitor<O>) -> Void, _ from: From<O>, _ fetchClauses: FetchClause...) {
         
-        self.defaultStack.monitorList(createAsynchronously: createAsynchronously, from, fetchClauses)
+        CoreStoreDefaults.dataStack.monitorList(createAsynchronously: createAsynchronously, from, fetchClauses)
     }
     
     /**
-     Using the `defaultStack`, asynchronously creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
+     Using the `CoreStoreDefaults.dataStack`, asynchronously creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
      
      - parameter createAsynchronously: the closure that receives the created `ListMonitor` instance
      - parameter from: a `From` clause indicating the entity type
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      */
-    public static func monitorList<D>(createAsynchronously: @escaping (ListMonitor<D>) -> Void, _ from: From<D>, _ fetchClauses: [FetchClause])  {
+    public static func monitorList<O>(createAsynchronously: @escaping (ListMonitor<O>) -> Void, _ from: From<O>, _ fetchClauses: [FetchClause])  {
         
-        self.defaultStack.monitorList(createAsynchronously: createAsynchronously, from, fetchClauses)
+        CoreStoreDefaults.dataStack.monitorList(createAsynchronously: createAsynchronously, from, fetchClauses)
     }
     
     /**
      Asynchronously creates a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified `FetchChainableBuilderType` built from a chain of clauses. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
      
      ```
-     CoreStore.monitorList(
-         { (monitor) in
+     dataStack.monitorList(
+         createAsynchronously: { (monitor) in
              self.monitor = monitor
          },
          From<MyPersonEntity>()
@@ -123,11 +124,10 @@ public extension CoreStore {
      ```
      - parameter createAsynchronously: the closure that receives the created `ListMonitor` instance
      - parameter clauseChain: a `FetchChainableBuilderType` built from a chain of clauses
-     - returns: a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified `FetchChainableBuilderType`
      */
     public static func monitorList<B: FetchChainableBuilderType>(createAsynchronously: @escaping (ListMonitor<B.ObjectType>) -> Void, _ clauseChain: B) {
         
-        self.defaultStack.monitorList(
+        CoreStoreDefaults.dataStack.monitorList(
             createAsynchronously: createAsynchronously,
             clauseChain.from,
             clauseChain.fetchClauses
@@ -135,35 +135,35 @@ public extension CoreStore {
     }
     
     /**
-     Using the `defaultStack`, creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
+     Using the `CoreStoreDefaults.dataStack`, creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
      
      - parameter from: a `From` clause indicating the entity type
      - parameter sectionBy: a `SectionBy` clause indicating the keyPath for the attribute to use when sorting the list into sections.
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      - returns: a `ListMonitor` instance that monitors changes to the list
      */
-    public static func monitorSectionedList<D>(_ from: From<D>, _ sectionBy: SectionBy<D>, _ fetchClauses: FetchClause...) -> ListMonitor<D> {
+    public static func monitorSectionedList<O>(_ from: From<O>, _ sectionBy: SectionBy<O>, _ fetchClauses: FetchClause...) -> ListMonitor<O> {
         
-        return self.defaultStack.monitorSectionedList(from, sectionBy, fetchClauses)
+        return CoreStoreDefaults.dataStack.monitorSectionedList(from, sectionBy, fetchClauses)
     }
     
     /**
-     Using the `defaultStack`, creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
+     Using the `CoreStoreDefaults.dataStack`, creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list.
      
      - parameter from: a `From` clause indicating the entity type
      - parameter sectionBy: a `SectionBy` clause indicating the keyPath for the attribute to use when sorting the list into sections.
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      - returns: a `ListMonitor` instance that monitors changes to the list
      */
-    public static func monitorSectionedList<D>(_ from: From<D>, _ sectionBy: SectionBy<D>, _ fetchClauses: [FetchClause]) -> ListMonitor<D> {
+    public static func monitorSectionedList<O>(_ from: From<O>, _ sectionBy: SectionBy<O>, _ fetchClauses: [FetchClause]) -> ListMonitor<O> {
         
-        return self.defaultStack.monitorSectionedList(from, sectionBy, fetchClauses)
+        return CoreStoreDefaults.dataStack.monitorSectionedList(from, sectionBy, fetchClauses)
     }
     
     /**
      Creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified `SectionMonitorBuilderType` built from a chain of clauses.
      ```
-     let monitor = CoreStore.monitorSectionedList(
+     let monitor = dataStack.monitorSectionedList(
          From<MyPersonEntity>()
              .sectionBy(\.age, { "\($0!) years old" })
              .where(\.age > 18)
@@ -175,7 +175,7 @@ public extension CoreStore {
      */
     public static func monitorSectionedList<B: SectionMonitorBuilderType>(_ clauseChain: B) -> ListMonitor<B.ObjectType> {
         
-        return self.defaultStack.monitorSectionedList(
+        return CoreStoreDefaults.dataStack.monitorSectionedList(
             clauseChain.from,
             clauseChain.sectionBy,
             clauseChain.fetchClauses
@@ -183,36 +183,36 @@ public extension CoreStore {
     }
     
     /**
-     Using the `defaultStack`, asynchronously creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
+     Using the `CoreStoreDefaults.dataStack`, asynchronously creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
      
      - parameter createAsynchronously: the closure that receives the created `ListMonitor` instance
      - parameter from: a `From` clause indicating the entity type
      - parameter sectionBy: a `SectionBy` clause indicating the keyPath for the attribute to use when sorting the list into sections.
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      */
-    public static func monitorSectionedList<D>(createAsynchronously: @escaping (ListMonitor<D>) -> Void, _ from: From<D>, _ sectionBy: SectionBy<D>, _ fetchClauses: FetchClause...) {
+    public static func monitorSectionedList<O>(createAsynchronously: @escaping (ListMonitor<O>) -> Void, _ from: From<O>, _ sectionBy: SectionBy<O>, _ fetchClauses: FetchClause...) {
         
-        self.defaultStack.monitorSectionedList(createAsynchronously: createAsynchronously, from, sectionBy, fetchClauses)
+        CoreStoreDefaults.dataStack.monitorSectionedList(createAsynchronously: createAsynchronously, from, sectionBy, fetchClauses)
     }
     
     /**
-     Using the `defaultStack`, asynchronously creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
+     Using the `CoreStoreDefaults.dataStack`, asynchronously creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified fetch clauses. Multiple `ListObserver`s may then register themselves to be notified when changes are made to the list. Since `NSFetchedResultsController` greedily locks the persistent store on initial fetch, you may prefer this method instead of the synchronous counterpart to avoid deadlocks while background updates/saves are being executed.
      
      - parameter createAsynchronously: the closure that receives the created `ListMonitor` instance
      - parameter from: a `From` clause indicating the entity type
      - parameter sectionBy: a `SectionBy` clause indicating the keyPath for the attribute to use when sorting the list into sections.
      - parameter fetchClauses: a series of `FetchClause` instances for fetching the object list. Accepts `Where`, `OrderBy`, and `Tweak` clauses.
      */
-    public static func monitorSectionedList<D>(createAsynchronously: @escaping (ListMonitor<D>) -> Void, _ from: From<D>, _ sectionBy: SectionBy<D>, _ fetchClauses: [FetchClause]) {
+    public static func monitorSectionedList<O>(createAsynchronously: @escaping (ListMonitor<O>) -> Void, _ from: From<O>, _ sectionBy: SectionBy<O>, _ fetchClauses: [FetchClause]) {
         
-        self.defaultStack.monitorSectionedList(createAsynchronously: createAsynchronously, from, sectionBy, fetchClauses)
+        CoreStoreDefaults.dataStack.monitorSectionedList(createAsynchronously: createAsynchronously, from, sectionBy, fetchClauses)
     }
     
     /**
      Asynchronously creates a `ListMonitor` for a sectioned list of `DynamicObject`s that satisfy the specified `SectionMonitorBuilderType` built from a chain of clauses.
      ```
-     CoreStore.monitorSectionedList(
-         { (monitor) in
+     dataStack.monitorSectionedList(
+         createAsynchronously: { (monitor) in
              self.monitor = monitor
          },
          From<MyPersonEntity>()
@@ -221,12 +221,12 @@ public extension CoreStore {
              .orderBy(.ascending(\.age))
      )
      ```
+     - parameter createAsynchronously: the closure that receives the created `ListMonitor` instance
      - parameter clauseChain: a `SectionMonitorBuilderType` built from a chain of clauses
-     - returns: a `ListMonitor` for a list of `DynamicObject`s that satisfy the specified `SectionMonitorBuilderType`
      */
     public static func monitorSectionedList<B: SectionMonitorBuilderType>(createAsynchronously: @escaping (ListMonitor<B.ObjectType>) -> Void, _ clauseChain: B) {
         
-        self.defaultStack.monitorSectionedList(
+        CoreStoreDefaults.dataStack.monitorSectionedList(
             createAsynchronously: createAsynchronously,
             clauseChain.from,
             clauseChain.sectionBy,

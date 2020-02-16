@@ -2,7 +2,7 @@
 //  GroupBy.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import CoreData
 /**
  The `GroupBy` clause specifies that the result of a query be grouped accoording to the specified key path.
  */
-public struct GroupBy<D: DynamicObject>: GroupByClause, QueryClause, Hashable {
+public struct GroupBy<O: DynamicObject>: GroupByClause, QueryClause, Hashable {
     
     /**
      Initializes a `GroupBy` clause with an empty list of key path strings
@@ -66,7 +66,7 @@ public struct GroupBy<D: DynamicObject>: GroupByClause, QueryClause, Hashable {
     
     // MARK: GroupByClause
     
-    public typealias ObjectType = D
+    public typealias ObjectType = O
     
     public let keyPaths: [KeyPathString]
     
@@ -77,9 +77,9 @@ public struct GroupBy<D: DynamicObject>: GroupByClause, QueryClause, Hashable {
         
         if let keyPaths = fetchRequest.propertiesToGroupBy as? [String], keyPaths != self.keyPaths {
             
-            CoreStore.log(
+            Internals.log(
                 .warning,
-                message: "An existing \"propertiesToGroupBy\" for the \(cs_typeName(NSFetchRequest<ResultType>.self)) was overwritten by \(cs_typeName(self)) query clause."
+                message: "An existing \"propertiesToGroupBy\" for the \(Internals.typeName(NSFetchRequest<ResultType>.self)) was overwritten by \(Internals.typeName(self)) query clause."
             )
         }
         
@@ -96,36 +96,42 @@ public struct GroupBy<D: DynamicObject>: GroupByClause, QueryClause, Hashable {
     
     
     // MARK: Hashable
-    
-    public var hashValue: Int {
-        
-        return (self.keyPaths as NSArray).hashValue
+
+    public func hash(into hasher: inout Hasher) {
+
+        hasher.combine(self.keyPaths)
     }
+    
+    
+    // MARK: Deprecated
+
+    @available(*, deprecated, renamed: "O")
+    public typealias D = O
 }
 
-public extension GroupBy where D: NSManagedObject {
+extension GroupBy where O: NSManagedObject {
     
     /**
      Initializes a `GroupBy` clause with a key path
      
      - parameter keyPath: a key path to group results with
      */
-    public init<T>(_ keyPath: KeyPath<D, T>) {
+    public init<T>(_ keyPath: KeyPath<O, T>) {
         
         self.init([keyPath._kvcKeyPathString!])
     }
 }
 
-public extension GroupBy where D: CoreStoreObject {
+extension GroupBy where O: CoreStoreObject {
     
     /**
      Initializes a `GroupBy` clause with a key path
      
      - parameter keyPath: a key path to group results with
      */
-    public init<T>(_ keyPath: KeyPath<D, ValueContainer<D>.Required<T>>) {
+    public init<T>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<T>>) {
         
-        self.init([D.meta[keyPath: keyPath].keyPath])
+        self.init([O.meta[keyPath: keyPath].keyPath])
     }
     
     /**
@@ -133,9 +139,9 @@ public extension GroupBy where D: CoreStoreObject {
      
      - parameter keyPath: a key path to group results with
      */
-    public init<T>(_ keyPath: KeyPath<D, ValueContainer<D>.Optional<T>>) {
+    public init<T>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<T>>) {
         
-        self.init([D.meta[keyPath: keyPath].keyPath])
+        self.init([O.meta[keyPath: keyPath].keyPath])
     }
     
     /**
@@ -143,9 +149,9 @@ public extension GroupBy where D: CoreStoreObject {
      
      - parameter keyPath: a key path to group results with
      */
-    public init<T>(_ keyPath: KeyPath<D, TransformableContainer<D>.Required<T>>) {
+    public init<T>(_ keyPath: KeyPath<O, TransformableContainer<O>.Required<T>>) {
         
-        self.init([D.meta[keyPath: keyPath].keyPath])
+        self.init([O.meta[keyPath: keyPath].keyPath])
     }
     
     /**
@@ -153,9 +159,9 @@ public extension GroupBy where D: CoreStoreObject {
      
      - parameter keyPath: a key path to group results with
      */
-    public init<T>(_ keyPath: KeyPath<D, TransformableContainer<D>.Optional<T>>) {
+    public init<T>(_ keyPath: KeyPath<O, TransformableContainer<O>.Optional<T>>) {
         
-        self.init([D.meta[keyPath: keyPath].keyPath])
+        self.init([O.meta[keyPath: keyPath].keyPath])
     }
 }
 

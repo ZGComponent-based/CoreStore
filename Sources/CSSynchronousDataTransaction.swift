@@ -2,7 +2,7 @@
 //  CSSynchronousDataTransaction.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import CoreData
  
  - SeeAlso: `SynchronousDataTransaction`
  */
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 @objc
 public final class CSSynchronousDataTransaction: CSBaseDataTransaction, CoreStoreObjectiveCType {
     
@@ -60,7 +61,7 @@ public final class CSSynchronousDataTransaction: CSBaseDataTransaction, CoreStor
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -143,38 +144,12 @@ public final class CSSynchronousDataTransaction: CSBaseDataTransaction, CoreStor
         
         super.init(swiftValue)
     }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, message: "Use the new -[CSSynchronousDataTransaction commitAndWaitWithError:] method")
-    @objc
-    public func commitAndWait() -> CSSaveResult {
-        
-        return bridge {
-            
-            self.bridgeToSwift.commitAndWait()
-        }
-    }
-    
-    @available(*, deprecated, message: "Secondary tasks spawned from CSAsynchronousDataTransactions and CSSynchronousDataTransactions are no longer supported. ")
-    @objc
-    @discardableResult
-    public func beginSynchronous(_ closure: @escaping (_ transaction: CSSynchronousDataTransaction) -> Void) -> CSSaveResult? {
-        
-        return bridge {
-            
-            self.bridgeToSwift.beginSynchronous { (transaction) in
-                
-                closure(transaction.bridgeToObjectiveC)
-            }
-        }
-    }
 }
 
 
 // MARK: - SynchronousDataTransaction
 
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 extension SynchronousDataTransaction: CoreStoreSwiftType {
     
     // MARK: CoreStoreSwiftType

@@ -2,7 +2,7 @@
 //  DynamicModelTests.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,12 @@ import XCTest
 @testable
 import CoreStore
 
-#if os(OSX)
+#if os(macOS)
     typealias Color = NSColor
+
 #else
-    
     typealias Color = UIColor
+
 #endif
 
 class Animal: CoreStoreObject {
@@ -70,8 +71,13 @@ class Person: CoreStoreObject {
         customGetter: Person.getDisplayName(_:),
         affectedByKeyPaths: Person.keyPathsAffectingDisplayName()
     )
+
+    let spouse = Relationship.ToOne<Person>("spouse")
     
     let pets = Relationship.ToManyUnordered<Animal>("pets", inverse: { $0.master })
+
+    private let _spouse = Relationship.ToOne<Person>("_spouseInverse", inverse: { $0.spouse })
+
     
     private static func setTitle(_ partialObject: PartialObject<Person>, _ newValue: String) {
         
@@ -126,7 +132,7 @@ class DynamicModelTests: BaseTestDataTestCase {
                 versionLock: [
                     "Animal": [0x1b59d511019695cf, 0xdeb97e86c5eff179, 0x1cfd80745646cb3, 0x4ff99416175b5b9a],
                     "Dog": [0xe3f0afeb109b283a, 0x29998d292938eb61, 0x6aab788333cfc2a3, 0x492ff1d295910ea7],
-                    "Person": [0x66d8bbfd8b21561f, 0xcecec69ecae3570f, 0xc4b73d71256214ef, 0x89b99bfe3e013e8b]
+                    "Person": [0x2831cf046084d96d, 0xbe19b13ace54641, 0x635a082728b0f6f0, 0x3d4ef2dd4b74a87c]
                 ]
             )
         )
@@ -134,7 +140,7 @@ class DynamicModelTests: BaseTestDataTestCase {
             
             let k1 = String(keyPath: \Animal.species)
             XCTAssertEqual(k1, "species")
-            
+
             let k2 = String(keyPath: \Dog.species)
             XCTAssertEqual(k2, "species")
             
@@ -143,6 +149,9 @@ class DynamicModelTests: BaseTestDataTestCase {
             
             let updateDone = self.expectation(description: "update-done")
             let fetchDone = self.expectation(description: "fetch-done")
+            let willSetPriorObserverDone = self.expectation(description: "willSet-observe-prior-done")
+            let willSetNotPriorObserverDone = self.expectation(description: "willSet-observe-notPrior-done")
+            let didSetObserverDone = self.expectation(description: "didSet-observe-done")
             stack.perform(
                 asynchronous: { (transaction) in
                     
@@ -155,14 +164,108 @@ class DynamicModelTests: BaseTestDataTestCase {
                     
                     animal.color .= .yellow
                     XCTAssertEqual(animal.color.value, Color.yellow)
+
+                    for property in Animal.metaProperties(includeSuperclasses: true) {
+
+                        switch property.keyPath {
+
+                        case String(keyPath: \Animal.species):
+                            XCTAssertTrue(property is ValueContainer<Animal>.Required<String>)
+
+                        case String(keyPath: \Animal.master):
+                            XCTAssertTrue(property is RelationshipContainer<Animal>.ToOne<Person>)
+
+                        case String(keyPath: \Animal.color):
+                            XCTAssertTrue(property is TransformableContainer<Animal>.Optional<Color>)
+
+                        default:
+                            XCTFail("Unknown KeyPath: \"\(property.keyPath)\"")
+                        }
+                    }
                     
                     let dog = transaction.create(Into<Dog>())
                     XCTAssertEqual(dog.species.value, "Swift")
                     XCTAssertEqual(dog.nickname.value, nil)
                     XCTAssertEqual(dog.age.value, 1)
+
+                    for property in Dog.metaProperties(includeSuperclasses: true) {
+
+                        switch property.keyPath {
+
+                        case String(keyPath: \Dog.species):
+                            XCTAssertTrue(property is ValueContainer<Animal>.Required<String>)
+
+                        case String(keyPath: \Dog.master):
+                            XCTAssertTrue(property is RelationshipContainer<Animal>.ToOne<Person>)
+
+                        case String(keyPath: \Dog.color):
+                            XCTAssertTrue(property is TransformableContainer<Animal>.Optional<Color>)
+
+                        case String(keyPath: \Dog.nickname):
+                            XCTAssertTrue(property is ValueContainer<Dog>.Optional<String>)
+
+                        case String(keyPath: \Dog.age):
+                            XCTAssertTrue(property is ValueContainer<Dog>.Required<Int>)
+
+                        case String(keyPath: \Dog.friends):
+                            XCTAssertTrue(property is RelationshipContainer<Dog>.ToManyOrdered<Dog>)
+
+                        case String(keyPath: \Dog.friendedBy):
+                            XCTAssertTrue(property is RelationshipContainer<Dog>.ToManyUnordered<Dog>)
+
+                        default:
+                            XCTFail("Unknown KeyPath: \"\(property.keyPath)\"")
+                        }
+                    }
+
+//                    #if swift(>=5.1)
+//
+//                    let dogKeyPathBuilder = Dog.keyPathBuilder()
+//                    XCTAssertEqual(dogKeyPathBuilder.species.keyPathString, "SELF.species")
+//                    XCTAssertEqual(dogKeyPathBuilder.master.title.keyPathString, "SELF.master.title")
+//                    let a = dogKeyPathBuilder.master
+//                    let b = dogKeyPathBuilder.master.spouse
+//                    let c = dogKeyPathBuilder.master.spouse.pets
+//                    let d = dogKeyPathBuilder.master.spouse.pets.color
+//                    XCTAssertEqual(dogKeyPathBuilder.master.spouse.pets.color.keyPathString, "SELF.master.spouse.pets.color")
+//
+//                    #endif
+
+                    let didSetObserver = dog.species.observe(options: [.new, .old]) { (object, change) in
+
+                        XCTAssertEqual(object, dog)
+                        XCTAssertEqual(change.kind, .setting)
+                        XCTAssertEqual(change.newValue, "Dog")
+                        XCTAssertEqual(change.oldValue, "Swift")
+                        XCTAssertFalse(change.isPrior)
+                        XCTAssertEqual(object.species.value, "Dog")
+                        didSetObserverDone.fulfill()
+                    }
+                    let willSetObserver = dog.species.observe(options: [.new, .old, .prior]) { (object, change) in
+
+                        XCTAssertEqual(object, dog)
+                        XCTAssertEqual(change.kind, .setting)
+                        XCTAssertEqual(change.oldValue, "Swift")
+
+                        if change.isPrior {
+
+                            XCTAssertNil(change.newValue)
+                            XCTAssertEqual(object.species.value, "Swift")
+                            willSetPriorObserverDone.fulfill()
+                        }
+                        else {
+
+                            XCTAssertEqual(change.newValue, "Dog")
+                            XCTAssertEqual(object.species.value, "Dog")
+                            willSetNotPriorObserverDone.fulfill()
+                        }
+                    }
                     
                     dog.species .= "Dog"
                     XCTAssertEqual(dog.species.value, "Dog")
+
+                    didSetObserver.invalidate()
+                    willSetObserver.invalidate()
                     
                     dog.nickname .= "Spot"
                     XCTAssertEqual(dog.nickname.value, "Spot")
@@ -171,7 +274,9 @@ class DynamicModelTests: BaseTestDataTestCase {
                     XCTAssertTrue(person.pets.value.isEmpty)
                     
                     XCTAssertEqual(
-                        type(of: person.rawObject!).keyPathsForValuesAffectingValue(forKey: "displayName"),
+                        person.rawObject!
+                            .runtimeType()
+                            .keyPathsForValuesAffectingValue(forKey: "displayName"),
                         ["title", "name"]
                     )
                     
@@ -187,8 +292,32 @@ class DynamicModelTests: BaseTestDataTestCase {
                     XCTAssertEqual(person.name.value, "John")
                     XCTAssertEqual(person.displayName.value, "Mr. John") // Custom getter
                     
+                    let personSnapshot1 = person.asSnapshot(in: transaction)!
+                    XCTAssertEqual(person.name.value, personSnapshot1.name)
+                    XCTAssertEqual(person.title.value, personSnapshot1.title)
+                    XCTAssertEqual(person.displayName.value, personSnapshot1.displayName)
+                    
                     person.title .= "Sir"
                     XCTAssertEqual(person.displayName.value, "Sir John")
+                    
+                    XCTAssertEqual(personSnapshot1.name, "John")
+                    XCTAssertEqual(personSnapshot1.title, "Mr.")
+                    XCTAssertEqual(personSnapshot1.displayName, "Mr. John")
+                    
+                    let personSnapshot2 = person.asSnapshot(in: transaction)!
+                    XCTAssertEqual(person.name.value, personSnapshot2.name)
+                    XCTAssertEqual(person.title.value, personSnapshot2.title)
+                    XCTAssertEqual(person.displayName.value, personSnapshot2.displayName)
+
+                    var personSnapshot3 = personSnapshot2
+                    personSnapshot3.name = "James"
+                    XCTAssertEqual(personSnapshot1.name, "John")
+                    XCTAssertEqual(personSnapshot1.displayName, "Mr. John")
+                    XCTAssertEqual(personSnapshot2.name, "John")
+                    XCTAssertEqual(personSnapshot2.displayName, "Sir John")
+                    XCTAssertEqual(personSnapshot3.name, "James")
+                    XCTAssertEqual(personSnapshot3.displayName, "Sir John")
+
                     
                     person.pets.value.insert(dog)
                     XCTAssertEqual(person.pets.count, 1)
@@ -212,51 +341,54 @@ class DynamicModelTests: BaseTestDataTestCase {
                     let p1 = Where<Animal>({ $0.species == "Sparrow" })
                     XCTAssertEqual(p1.predicate, NSPredicate(format: "%K == %@", "species", "Sparrow"))
                     
-                    let bird = transaction.fetchOne(From<Animal>(), p1)
+                    let bird = try transaction.fetchOne(From<Animal>(), p1)
                     XCTAssertNotNil(bird)
                     XCTAssertEqual(bird!.species.value, "Sparrow")
                     
                     let p2 = Where<Dog>({ $0.nickname == "Spot" })
                     XCTAssertEqual(p2.predicate, NSPredicate(format: "%K == %@", "nickname", "Spot"))
                     
-                    let dog = transaction.fetchOne(From<Dog>().where(\.nickname == "Spot"))
+                    let dog = try transaction.fetchOne(From<Dog>().where(\.nickname == "Spot"))
                     XCTAssertNotNil(dog)
                     XCTAssertEqual(dog!.nickname.value, "Spot")
                     XCTAssertEqual(dog!.species.value, "Dog")
                     
-                    let person = transaction.fetchOne(From<Person>())
+                    let person = try transaction.fetchOne(From<Person>())
                     XCTAssertNotNil(person)
                     XCTAssertEqual(person!.pets.value.first, dog)
                     
                     let p3 = Where<Dog>({ $0.age == 10 })
                     XCTAssertEqual(p3.predicate, NSPredicate(format: "%K == %d", "age", 10))
+
+                    let totalAge = try transaction.queryValue(From<Dog>().select(Int.self, .sum(\Dog.age)))
+                    XCTAssertEqual(totalAge, 1)
                     
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>()
-                            .where(\Animal.species == "Dog" && \.age == 10)
+                            .where(\Animal.species == "Dog" && \Dog.age == 10)
                     )
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>()
-                            .where(\.age == 10 && \Animal.species == "Dog")
+                            .where(\Dog.age == 10 && \Animal.species == "Dog")
                             .orderBy(.ascending({ $0.species }))
                     )
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>(),
                         Where<Dog>({ $0.age > 10 && $0.age <= 15 })
                     )
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>(),
                         Where<Dog>({ $0.species == "Dog" && $0.age == 10 })
                     )
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>(),
                         Where<Dog>({ $0.age == 10 && $0.species == "Dog" })
                     )
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>(),
                         Where<Dog>({ $0.age > 10 && $0.age <= 15 })
                     )
-                    _ = transaction.fetchAll(
+                    _ = try transaction.fetchAll(
                         From<Dog>(),
                         (\Dog.age > 10 && \Dog.age <= 15)
                     )
@@ -292,7 +424,7 @@ class DynamicModelTests: BaseTestDataTestCase {
                     SQLiteStore(
                         fileURL: SQLiteStore.defaultRootDirectory
                             .appendingPathComponent(UUID().uuidString)
-                            .appendingPathComponent("\(type(of: self))_\((configuration ?? "-null-")).sqlite"),
+                            .appendingPathComponent("\(Self.self)_\((configuration ?? "-null-")).sqlite"),
                         configuration: configuration,
                         localStorageOptions: .recreateStoreOnModelMismatch
                     )

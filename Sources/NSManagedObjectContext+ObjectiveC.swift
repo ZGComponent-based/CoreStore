@@ -2,7 +2,7 @@
 //  NSManagedObjectContext+ObjectiveC.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,144 +29,114 @@ import CoreData
 
 // MARK: - NSManagedObjectContext
 
-internal extension NSManagedObjectContext {
+extension NSManagedObjectContext {
 
     // MARK: Internal
     
     @nonobjc
-    internal func fetchOne(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) -> NSManagedObject? {
+    internal func fetchOne(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) throws -> NSManagedObject? {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSManagedObject>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 1
         fetchRequest.resultType = .managedObjectResultType
         fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.fetchOne(fetchRequest.dynamicCast())
+
+        return try self.fetchOne(fetchRequest)
     }
     
     @nonobjc
-    internal func fetchAll<T: NSManagedObject>(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) -> [T]? {
+    internal func fetchAll<T: NSManagedObject>(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) throws -> [T] {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<T>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 0
         fetchRequest.resultType = .managedObjectResultType
         fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.fetchAll(fetchRequest.dynamicCast())
+
+        return try self.fetchAll(fetchRequest)
     }
     
     @nonobjc
-    internal func fetchCount(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) -> Int? {
+    internal func fetchCount(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) throws -> Int {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSNumber>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+
+        fetchRequest.resultType = .countResultType
         fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.fetchCount(fetchRequest.dynamicCast())
+
+        return try self.fetchCount(fetchRequest)
     }
     
     @nonobjc
-    internal func fetchObjectID(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) -> NSManagedObjectID? {
+    internal func fetchObjectID(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) throws -> NSManagedObjectID? {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSManagedObjectID>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 1
         fetchRequest.resultType = .managedObjectIDResultType
         fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.fetchObjectID(fetchRequest.dynamicCast())
+
+        return try self.fetchObjectID(fetchRequest)
     }
     
     @nonobjc
-    internal func fetchObjectIDs(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) -> [NSManagedObjectID]? {
+    internal func fetchObjectIDs(_ from: CSFrom, _ fetchClauses: [CSFetchClause]) throws -> [NSManagedObjectID] {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSManagedObjectID>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 0
         fetchRequest.resultType = .managedObjectIDResultType
         fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.fetchObjectIDs(fetchRequest.dynamicCast())
+
+        return try self.fetchObjectIDs(fetchRequest)
     }
     
     @nonobjc
-    internal func deleteAll(_ from: CSFrom, _ deleteClauses: [CSDeleteClause]) -> Int? {
+    internal func deleteAll(_ from: CSFrom, _ deleteClauses: [CSDeleteClause]) throws -> Int {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSManagedObject>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 0
         fetchRequest.resultType = .managedObjectResultType
         fetchRequest.returnsObjectsAsFaults = true
         fetchRequest.includesPropertyValues = false
         deleteClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.deleteAll(fetchRequest.dynamicCast())
+
+        return try self.deleteAll(fetchRequest)
     }
     
     @nonobjc
-    internal func queryValue(_ from: CSFrom, _ selectClause: CSSelect, _ queryClauses: [CSQueryClause]) -> Any? {
+    internal func queryValue(_ from: CSFrom, _ selectClause: CSSelect, _ queryClauses: [CSQueryClause]) throws -> Any? {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSDictionary>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 0
         
         selectClause.applyToFetchRequest(fetchRequest)
         queryClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.queryValue(selectClause.selectTerms, fetchRequest: fetchRequest.dynamicCast())
+
+        return try self.queryValue(selectClause.selectTerms, fetchRequest: fetchRequest)
     }
     
     @nonobjc
-    internal func queryAttributes(_ from: CSFrom, _ selectClause: CSSelect, _ queryClauses: [CSQueryClause]) -> [[String: Any]]? {
+    internal func queryAttributes(_ from: CSFrom, _ selectClause: CSSelect, _ queryClauses: [CSQueryClause]) throws -> [[String: Any]] {
         
-        let fetchRequest = CoreStoreFetchRequest()
-        let storeFound = from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
+        let fetchRequest = Internals.CoreStoreFetchRequest<NSDictionary>()
+        try from.bridgeToSwift.applyToFetchRequest(fetchRequest, context: self)
         
         fetchRequest.fetchLimit = 0
         
         selectClause.applyToFetchRequest(fetchRequest)
         queryClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
-        
-        guard storeFound else {
-            
-            return nil
-        }
-        return self.queryAttributes(fetchRequest.dynamicCast())
+
+        return try self.queryAttributes(fetchRequest)
     }
 }

@@ -2,7 +2,7 @@
 //  UnsafeDataTransaction.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -68,9 +68,9 @@ public final class UnsafeDataTransaction: BaseDataTransaction {
      */
     public func rollback() {
         
-        CoreStore.assert(
+        Internals.assert(
             self.supportsUndo,
-            "Attempted to rollback a \(cs_typeName(self)) with Undo support disabled."
+            "Attempted to rollback a \(Internals.typeName(self)) with Undo support disabled."
         )
         self.context.rollback()
     }
@@ -80,9 +80,9 @@ public final class UnsafeDataTransaction: BaseDataTransaction {
      */
     public func undo() {
         
-        CoreStore.assert(
+        Internals.assert(
             self.supportsUndo,
-            "Attempted to undo a \(cs_typeName(self)) with Undo support disabled."
+            "Attempted to undo a \(Internals.typeName(self)) with Undo support disabled."
         )
         self.context.undo()
     }
@@ -116,9 +116,9 @@ public final class UnsafeDataTransaction: BaseDataTransaction {
      */
     public func redo() {
         
-        CoreStore.assert(
+        Internals.assert(
             self.supportsUndo,
-            "Attempted to redo a \(cs_typeName(self)) with Undo support disabled."
+            "Attempted to redo a \(Internals.typeName(self)) with Undo support disabled."
         )
         self.context.redo()
     }

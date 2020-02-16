@@ -2,7 +2,7 @@
 //  CSXcodeDataModelSchema.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ import Foundation
  - SeeAlso: `XcodeDataModelSchema`
  */
 @objc
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 public final class CSXcodeDataModelSchema: NSObject, CSDynamicSchema, CoreStoreObjectiveCType {
     
     /**
@@ -71,7 +72,7 @@ public final class CSXcodeDataModelSchema: NSObject, CSDynamicSchema, CoreStoreO
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -104,6 +105,7 @@ public final class CSXcodeDataModelSchema: NSObject, CSDynamicSchema, CoreStoreO
 
 // MARK: - XcodeDataModelSchema
 
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 extension XcodeDataModelSchema: CoreStoreSwiftType {
     
     // MARK: CoreStoreSwiftType

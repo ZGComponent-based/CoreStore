@@ -2,7 +2,7 @@
 //  CSCoreStore.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ import Foundation
  
  - SeeAlso: `CoreStore`
  */
+@available(*, deprecated, message: "Call methods directly from the CSDataStack instead")
 @objc
 public final class CSCoreStore: NSObject {
     
@@ -45,14 +46,8 @@ public final class CSCoreStore: NSObject {
     @objc
     public static var defaultStack: CSDataStack {
         
-        get {
-            
-            return CoreStore.defaultStack.bridgeToObjectiveC
-        }
-        set {
-            
-            CoreStore.defaultStack = newValue.bridgeToSwift
-        }
+        get { return CoreStoreDefaults.dataStack.bridgeToObjectiveC }
+        set { CoreStoreDefaults.dataStack = newValue.bridgeToSwift }
     }
     
     

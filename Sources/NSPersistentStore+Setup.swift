@@ -2,7 +2,7 @@
 //  NSPersistentStore+Setup.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import CoreData
 
 // MARK: - NSPersistentStore
 
-internal extension NSPersistentStore {
+extension NSPersistentStore {
     
     // MARK: Internal
     
@@ -38,7 +38,7 @@ internal extension NSPersistentStore {
         
         get {
             
-            let wrapper: StorageObject? = cs_getAssociatedObjectForKey(
+            let wrapper: StorageObject? = Internals.getAssociatedObjectForKey(
                 &PropertyKeys.storageInterface,
                 inObject: self
             )
@@ -46,7 +46,7 @@ internal extension NSPersistentStore {
         }
         set {
             
-            cs_setAssociatedRetainedObject(
+            Internals.setAssociatedRetainedObject(
                 StorageObject(newValue),
                 forKey: &PropertyKeys.storageInterface,
                 inObject: self

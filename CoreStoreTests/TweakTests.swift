@@ -2,7 +2,7 @@
 //  TweakTests.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ final class TweakTests: XCTestCase {
             $0.fetchLimit = 200
             $0.predicate = predicate
         }
-        let request = CoreStoreFetchRequest()
+        let request = Internals.CoreStoreFetchRequest<NSFetchRequestResult>()
         tweak.applyToFetchRequest(request)
         XCTAssertEqual(request.fetchOffset, 100)
         XCTAssertEqual(request.fetchLimit, 200)

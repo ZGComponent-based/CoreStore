@@ -3,7 +3,7 @@
 //  CoreStoreDemo
 //
 //  Created by John Rommel Estropia on 2015/06/17.
-//  Copyright © 2015 John Rommel Estropia. All rights reserved.
+//  Copyright © 2018 John Rommel Estropia. All rights reserved.
 //
 
 import UIKit
@@ -30,7 +30,7 @@ class FetchingResultsViewController: UITableViewController {
         super.viewDidLoad()
         
         self.tableView.estimatedRowHeight = 60
-        self.tableView.rowHeight = UITableViewAutomaticDimension
+        self.tableView.rowHeight = UITableView.automaticDimension
     }
     
     

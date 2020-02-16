@@ -3,7 +3,7 @@
 //  CoreStoreDemo
 //
 //  Created by John Rommel Estropia on 2015/06/05.
-//  Copyright © 2015 John Rommel Estropia. All rights reserved.
+//  Copyright © 2018 John Rommel Estropia. All rights reserved.
 //
 
 import UIKit
@@ -16,11 +16,6 @@ class CustomLoggerViewController: UIViewController, CoreStoreLogger {
     
     // MARK: NSObject
     
-    deinit {
-        
-        CoreStore.logger = DefaultLogger()
-    }
-    
     let dataStack = DataStack()
     
     // MARK: UIViewController
@@ -30,13 +25,14 @@ class CustomLoggerViewController: UIViewController, CoreStoreLogger {
         super.viewDidLoad()
         
         try! self.dataStack.addStorageAndWait(SQLiteStore(fileName: "emptyStore.sqlite"))
-        CoreStore.logger = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
         
         super.viewDidAppear(animated)
-        
+
+        CoreStoreDefaults.logger = self
+
         let alert = UIAlertController(
             title: "Logger Demo",
             message: "This demo shows how to plug-in any logging framework to CoreStore.\n\nThe view controller implements CoreStoreLogger and appends all logs to the text view.",
@@ -44,6 +40,13 @@ class CustomLoggerViewController: UIViewController, CoreStoreLogger {
         )
         alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+
+        super.viewDidDisappear(animated)
+
+        CoreStoreDefaults.logger = DefaultLogger()
     }
 
     
@@ -113,7 +116,7 @@ class CustomLoggerViewController: UIViewController, CoreStoreLogger {
         case 2?:
             DispatchQueue.global(qos: .background).async {
                 
-                _ = self.dataStack.fetchOne(From<Place>())
+                _ = try! self.dataStack.fetchOne(From<Place>())
             }
             
         default:

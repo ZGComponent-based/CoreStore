@@ -2,7 +2,7 @@
 //  Progress+Convenience.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import Foundation
 
 // MARK: - Progress
 
-public extension Progress {
+extension Progress {
     
     /**
      Sets a closure that the `Progress` calls whenever its `fractionCompleted` changes. You can use this instead of setting up KVO.
@@ -54,14 +54,14 @@ public extension Progress {
         
         get {
             
-            let object: ProgressObserver? = cs_getAssociatedObjectForKey(&PropertyKeys.progressObserver, inObject: self)
+            let object: ProgressObserver? = Internals.getAssociatedObjectForKey(&PropertyKeys.progressObserver, inObject: self)
             if let observer = object {
                 
                 return observer
             }
             
             let observer = ProgressObserver(self)
-            cs_setAssociatedRetainedObject(
+            Internals.setAssociatedRetainedObject(
                 observer,
                 forKey: &PropertyKeys.progressObserver,
                 inObject: self

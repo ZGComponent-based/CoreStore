@@ -2,7 +2,7 @@
 //  AttributeProtocol.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,19 +29,22 @@ import CoreData
 
 // MARK: - AttributeProtocol
 
-internal protocol AttributeProtocol: class {
-    
-    static var attributeType: NSAttributeType { get }
-    
-    var keyPath: KeyPathString { get }
-    var isOptional: Bool { get }
-    var isIndexed: Bool { get }
-    var isTransient: Bool { get }
-    var versionHashModifier: () -> String? { get }
-    var renamingIdentifier: () -> String? { get }
-    var defaultValue: () -> Any? { get }
-    var affectedByKeyPaths: () -> Set<String> { get }
-    var parentObject: CoreStoreObject? { get set }
+internal protocol AttributeProtocol: PropertyProtocol {
+
+    typealias EntityDescriptionValues = (
+        attributeType: NSAttributeType,
+        isOptional: Bool,
+        isTransient: Bool,
+        allowsExternalBinaryDataStorage: Bool,
+        versionHashModifier: String?,
+        renamingIdentifier: String?,
+        affectedByKeyPaths: Set<String>,
+        defaultValue: Any?
+    )
+
+    var entityDescriptionValues: () -> EntityDescriptionValues { get }
+    var rawObject: CoreStoreManagedObject? { get set }
     var getter: CoreStoreManagedObject.CustomGetter? { get }
     var setter: CoreStoreManagedObject.CustomSetter? { get }
+    var valueForSnapshot: Any? { get }
 }

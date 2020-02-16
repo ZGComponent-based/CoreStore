@@ -3,7 +3,7 @@
 //  CoreStoreDemo
 //
 //  Created by John Rommel Estropia on 2015/05/06.
-//  Copyright © 2015 John Rommel Estropia. All rights reserved.
+//  Copyright © 2018 John Rommel Estropia. All rights reserved.
 //
 
 import UIKit
@@ -14,29 +14,22 @@ import CoreStore
 
 class ObjectObserverDemoViewController: UIViewController, ObjectObserver {
     
-    var palette: Palette? {
+    func setPalette<O: ObjectRepresentation>(_ newValue: O?) where O.ObjectType == Palette {
         
-        get {
+        guard self.monitor?.object?.objectID() != newValue?.objectID() else {
             
-            return self.monitor?.object
+            return
         }
-        set {
+        if let newValue = newValue {
             
-            guard self.monitor?.object != newValue else {
-                
-                return
-            }
+            self.monitor = newValue.asReadOnly(in: ColorsDemo.stack).map(ColorsDemo.stack.monitorObject(_:))
+        }
+        else {
             
-            if let palette = newValue {
-                
-                self.monitor = ColorsDemo.stack.monitorObject(palette)
-            }
-            else {
-                
-                self.monitor = nil
-            }
+            self.monitor = nil
         }
     }
+    
     
     // MARK: NSObject
     
@@ -50,7 +43,7 @@ class ObjectObserverDemoViewController: UIViewController, ObjectObserver {
     
     required init?(coder aDecoder: NSCoder) {
         
-        if let palette = ColorsDemo.stack.fetchOne(From<Palette>().orderBy(.ascending(\.hue))) {
+        if let palette = try! ColorsDemo.stack.fetchOne(From<Palette>().orderBy(.ascending(\.hue))) {
             
             self.monitor = ColorsDemo.stack.monitorObject(palette)
         }
@@ -64,7 +57,7 @@ class ObjectObserverDemoViewController: UIViewController, ObjectObserver {
                 }
             )
             
-            let palette = ColorsDemo.stack.fetchOne(From<Palette>().orderBy(.ascending(\.hue)))!
+            let palette = try! ColorsDemo.stack.fetchOne(From<Palette>().orderBy(.ascending(\.hue)))!
             self.monitor = ColorsDemo.stack.monitorObject(palette)
         }
         
@@ -184,15 +177,15 @@ class ObjectObserverDemoViewController: UIViewController, ObjectObserver {
         
         self.hsbLabel?.text = palette.colorText
         
-        if changedKeys == nil || changedKeys?.contains(Palette.keyPath{ $0.hue }) == true {
+        if changedKeys == nil || changedKeys?.contains(String(keyPath: \Palette.hue)) == true {
             
             self.hueSlider?.value = Float(palette.hue.value)
         }
-        if changedKeys == nil || changedKeys?.contains(Palette.keyPath{ $0.saturation }) == true {
+        if changedKeys == nil || changedKeys?.contains(String(keyPath: \Palette.saturation)) == true {
             
             self.saturationSlider?.value = palette.saturation.value
         }
-        if changedKeys == nil || changedKeys?.contains(Palette.keyPath{ $0.brightness }) == true {
+        if changedKeys == nil || changedKeys?.contains(String(keyPath: \Palette.brightness)) == true {
             
             self.brightnessSlider?.value = palette.brightness.value
         }

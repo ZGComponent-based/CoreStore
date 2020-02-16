@@ -2,7 +2,7 @@
 //  CoreStoreObject+Convenience.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import CoreData
 
 // MARK: - CoreStoreObject
 
-public extension CoreStoreObject {
+extension CoreStoreObject {
     
     /**
      Exposes a `FetchableSource` that can fetch sibling objects of this `CoreStoreObject` instance. This may be the `DataStack`, a `BaseDataTransaction`, the `NSManagedObjectContext` itself, or `nil` if the obejct's parent is already deallocated.

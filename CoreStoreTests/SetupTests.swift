@@ -2,7 +2,7 @@
 //  SetupTests.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ class SetupTests: BaseTestDataTestCase {
             let schemaHistory = SchemaHistory(
                 XcodeDataModelSchema.from(
                     modelName: "Model",
-                    bundle: Bundle(for: type(of: self))
+                    bundle: Bundle(for: Self.self)
                 )
             )
             let stack = DataStack(schemaHistory: schemaHistory)
@@ -56,9 +56,6 @@ class SetupTests: BaseTestDataTestCase {
             XCTAssertTrue(stack.schemaHistory.migrationChain.isEmpty)
             XCTAssertTrue(stack.schemaHistory.migrationChain.rootVersions.isEmpty)
             XCTAssertTrue(stack.schemaHistory.migrationChain.leafVersions.isEmpty)
-            
-            CoreStore.defaultStack = stack
-            XCTAssertEqual(CoreStore.defaultStack, stack)
         }
         do {
             
@@ -68,15 +65,12 @@ class SetupTests: BaseTestDataTestCase {
                 
                 DataStack(
                     xcodeModelName: "Model",
-                    bundle: Bundle(for: type(of: self)),
+                    bundle: Bundle(for: Self.self),
                     migrationChain: migrationChain
                 )
             }
             XCTAssertEqual(stack.modelVersion, "Model")
             XCTAssertEqual(stack.schemaHistory.migrationChain, migrationChain)
-            
-            CoreStore.defaultStack = stack
-            XCTAssertEqual(CoreStore.defaultStack, stack)
         }
     }
     
@@ -85,7 +79,7 @@ class SetupTests: BaseTestDataTestCase {
         
         let stack = DataStack(
             xcodeModelName: "Model",
-            bundle: Bundle(for: type(of: self))
+            bundle: Bundle(for: Self.self)
         )
         do {
             
@@ -140,7 +134,7 @@ class SetupTests: BaseTestDataTestCase {
         
         let stack = DataStack(
             xcodeModelName: "Model",
-            bundle: Bundle(for: type(of: self))
+            bundle: Bundle(for: Self.self)
         )
         do {
             
@@ -208,7 +202,7 @@ class SetupTests: BaseTestDataTestCase {
                 
                 let stack = DataStack(
                     xcodeModelName: "Model",
-                    bundle: Bundle(for: type(of: self))
+                    bundle: Bundle(for: Self.self)
                 )
                 try! stack.addStorageAndWait(sqliteStore)
                 self.prepareTestDataForStack(stack)
@@ -227,7 +221,7 @@ class SetupTests: BaseTestDataTestCase {
             let metadata = try createStore()
             let stack = DataStack(
                 xcodeModelName: "Model",
-                bundle: Bundle(for: type(of: self))
+                bundle: Bundle(for: Self.self)
             )
             try sqliteStore.cs_eraseStorageAndWait(
                 metadata: metadata,
@@ -260,7 +254,7 @@ class SetupTests: BaseTestDataTestCase {
         
         let stack = DataStack(
             xcodeModelName: "Model",
-            bundle: Bundle(for: type(of: self))
+            bundle: Bundle(for: Self.self)
         )
         do {
             
@@ -328,9 +322,16 @@ class SetupTests: BaseTestDataTestCase {
                 
                 let stack = DataStack(
                     xcodeModelName: "Model",
-                    bundle: Bundle(for: type(of: self))
+                    bundle: Bundle(for: Self.self)
                 )
-                try! stack.addStorageAndWait(sqliteStore)
+                try! stack.addStorageAndWait(
+                    SQLiteStore.legacy(
+                        fileName: sqliteStore.fileURL.lastPathComponent,
+                        configuration: sqliteStore.configuration,
+                        migrationMappingProviders: sqliteStore.migrationMappingProviders,
+                        localStorageOptions: .recreateStoreOnModelMismatch
+                    )
+                )
                 self.prepareTestDataForStack(stack)
             }
             XCTAssertTrue(fileManager.fileExists(atPath: sqliteStore.fileURL.path))
@@ -347,7 +348,7 @@ class SetupTests: BaseTestDataTestCase {
             let metadata = try createStore()
             let stack = DataStack(
                 xcodeModelName: "Model",
-                bundle: Bundle(for: type(of: self))
+                bundle: Bundle(for: Self.self)
             )
             try sqliteStore.cs_eraseStorageAndWait(
                 metadata: metadata,

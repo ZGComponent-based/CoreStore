@@ -2,7 +2,7 @@
 //  CSCoreStore+Querying.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@ import CoreData
 
 // MARK: - CSCoreStore
 
-public extension CSCoreStore {
+@available(*, deprecated, message: "Call methods directly from the DataStack instead")
+extension CSCoreStore {
     
     /**
      Using the `defaultStack`, fetches the `NSManagedObject` instance in the transaction's context from a reference created from a transaction or from a different managed object context.

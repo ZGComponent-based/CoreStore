@@ -2,7 +2,7 @@
 //  CSCoreStore+Transaction.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,8 @@ import Foundation
 
 // MARK: - CSCoreStore
 
-public extension CSCoreStore {
+@available(*, deprecated, message: "Call methods directly from the CSDataStack instead")
+extension CSCoreStore {
     
     /**
      Using the `defaultStack`, begins a transaction asynchronously where `NSManagedObject` creates, updates, and deletes can be made.
@@ -45,7 +46,7 @@ public extension CSCoreStore {
      Using the `defaultStack`, begins a transaction synchronously where `NSManagedObject` creates, updates, and deletes can be made.
      
      - parameter closure: the block where creates, updates, and deletes can be made to the transaction. Transaction blocks are executed serially in a background queue, and all changes are made from a concurrent `NSManagedObjectContext`.
-     - returns: a `CSSaveResult` value indicating success or failure, or `nil` if the transaction was not comitted synchronously
+     - returns: `YES` if the commit succeeded, `NO` if the commit failed. If `NO`, the `error` argument will hold error information.
      */
     @objc
     public static func beginSynchronous(_ closure: @escaping (_ transaction: CSSynchronousDataTransaction) -> Void, error: NSErrorPointer) -> Bool {
@@ -64,7 +65,7 @@ public extension CSCoreStore {
         
         return bridge {
             
-            CoreStore.beginUnsafe()
+            self.defaultStack.bridgeToSwift.beginUnsafe()
         }
     }
     
@@ -79,7 +80,7 @@ public extension CSCoreStore {
         
         return bridge {
             
-            CoreStore.beginUnsafe(supportsUndo: supportsUndo)
+            self.defaultStack.bridgeToSwift.beginUnsafe(supportsUndo: supportsUndo)
         }
     }
     
@@ -89,17 +90,6 @@ public extension CSCoreStore {
     @objc
     public static func refreshAndMergeAllObjects() {
         
-        CoreStore.refreshAndMergeAllObjects()
-    }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, message: "Use the new +[CSCoreStore beginSynchronous:error:] API that reports failure using an error instance.")
-    @objc
-    @discardableResult
-    public static func beginSynchronous(_ closure: @escaping (_ transaction: CSSynchronousDataTransaction) -> Void) -> CSSaveResult? {
-        
-        return self.defaultStack.beginSynchronous(closure)
+        self.defaultStack.refreshAndMergeAllObjects()
     }
 }

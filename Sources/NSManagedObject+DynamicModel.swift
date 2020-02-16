@@ -2,7 +2,7 @@
 //  NSManagedObject+DynamicModel.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,21 +29,21 @@ import CoreData
 
 // MARK: - NSManagedObject
 
-internal extension NSManagedObject {
+extension NSManagedObject {
     
     @nonobjc
     internal weak var coreStoreObject: CoreStoreObject? {
         
         get {
             
-            return cs_getAssociatedObjectForKey(
+            return Internals.getAssociatedObjectForKey(
                 &PropertyKeys.coreStoreObject,
                 inObject: self
             )
         }
         set {
             
-            cs_setAssociatedWeakObject(
+            Internals.setAssociatedWeakObject(
                 newValue,
                 forKey: &PropertyKeys.coreStoreObject,
                 inObject: self

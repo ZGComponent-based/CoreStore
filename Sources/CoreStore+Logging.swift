@@ -2,7 +2,7 @@
 //  CoreStore+Logging.swift
 //  CoreStore
 //
-//  Copyright © 2015 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,22 +26,16 @@
 import Foundation
 
 
-// MARK: - CoreStore
+// MARK: - Internal
 
-public extension CoreStore {
-    
-    /**
-    The `CoreStoreLogger` instance to be used. The default logger is an instance of a `DefaultLogger`.
-    */
-    public static var logger: CoreStoreLogger = DefaultLogger()
-    
-    
+extension Internals {
+
     // MARK: Internal
-    
+
     @inline(__always)
     internal static func log(_ level: LogLevel, message: String, fileName: StaticString = #file, lineNumber: Int = #line, functionName: StaticString = #function) {
-        
-        self.logger.log(
+
+        CoreStoreDefaults.logger.log(
             level: level,
             message: message,
             fileName: fileName,
@@ -49,11 +43,11 @@ public extension CoreStore {
             functionName: functionName
         )
     }
-    
+
     @inline(__always)
     internal static func log(_ error: CoreStoreError, _ message: String, fileName: StaticString = #file, lineNumber: Int = #line, functionName: StaticString = #function) {
-        
-        self.logger.log(
+
+        CoreStoreDefaults.logger.log(
             error: error,
             message: message,
             fileName: fileName,
@@ -61,11 +55,11 @@ public extension CoreStore {
             functionName: functionName
         )
     }
-    
+
     @inline(__always)
     internal static func assert( _ condition: @autoclosure () -> Bool, _ message: @autoclosure () -> String, fileName: StaticString = #file, lineNumber: Int = #line, functionName: StaticString = #function) {
-        
-        self.logger.assert(
+
+        CoreStoreDefaults.logger.assert(
             condition(),
             message: message(),
             fileName: fileName,
@@ -73,11 +67,11 @@ public extension CoreStore {
             functionName: functionName
         )
     }
-    
+
     @inline(__always)
     internal static func abort(_ message: String, fileName: StaticString = #file, lineNumber: Int = #line, functionName: StaticString = #function) -> Never  {
-        
-        self.logger.abort(
+
+        CoreStoreDefaults.logger.abort(
             message,
             fileName: fileName,
             lineNumber: lineNumber,

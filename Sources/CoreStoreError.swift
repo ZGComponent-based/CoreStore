@@ -2,7 +2,7 @@
 //  CoreStoreError.swift
 //  CoreStore
 //
-//  Copyright © 2014 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,11 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
      Progressive migrations are disabled for a store, but an `NSMappingModel` could not be found for a specific source and destination model versions.
      */
     case progressiveMigrationRequired(localStoreURL: URL)
+
+    /**
+     The `LocalStorage` was configured with `.allowSynchronousLightweightMigration`, but the model can only be migrated asynchronously.
+     */
+    case asynchronousMigrationRequired(localStoreURL: URL, NSError: NSError)
     
     /**
      An internal SDK call failed with the specified `NSError`.
@@ -68,6 +73,11 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
      The transaction was cancelled by the user.
      */
     case userCancelled
+
+    /**
+     Attempted to perform a fetch but could not find any related persistent store.
+     */
+    case persistentStoreNotFound(entity: DynamicObject.Type)
     
     
     // MARK: CustomNSError
@@ -92,6 +102,9 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
             
         case .progressiveMigrationRequired:
             return CoreStoreErrorCode.progressiveMigrationRequired.rawValue
+
+        case .asynchronousMigrationRequired:
+            return CoreStoreErrorCode.asynchronousMigrationRequired.rawValue
             
         case .internalError:
             return CoreStoreErrorCode.internalError.rawValue
@@ -101,6 +114,9 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
             
         case .userCancelled:
             return CoreStoreErrorCode.userCancelled.rawValue
+
+        case .persistentStoreNotFound:
+            return CoreStoreErrorCode.persistentStoreNotFound.rawValue
         }
     }
     
@@ -127,6 +143,12 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
             return [
                 "localStoreURL": localStoreURL
             ]
+
+        case .asynchronousMigrationRequired(let localStoreURL, let nsError):
+            return [
+                "localStoreURL": localStoreURL,
+                "NSError": nsError
+            ]
             
         case .internalError(let nsError):
             return [
@@ -140,6 +162,11 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
             
         case .userCancelled:
             return [:]
+
+        case .persistentStoreNotFound(let entity):
+            return [
+                "entity": entity
+            ]
         }
     }
     
@@ -161,6 +188,10 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
             
         case (.progressiveMigrationRequired(let url1), .progressiveMigrationRequired(let url2)):
             return url1 == url2
+
+        case (.asynchronousMigrationRequired(let url1, let NSError1), .asynchronousMigrationRequired(let url2, let NSError2)):
+            return url1 == url2
+                && NSError1.isEqual(NSError2)
             
         case (.internalError(let NSError1), .internalError(let NSError2)):
             return NSError1.isEqual(NSError2)
@@ -173,13 +204,13 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
             
             case (let error1 as NSError, let error2 as NSError):
                 return error1.isEqual(error2)
-                
-            default:
-                return false // shouldn't happen
             }
             
         case (.userCancelled, .userCancelled):
             return true
+
+        case (.persistentStoreNotFound(let entity1), .persistentStoreNotFound(let entity2)):
+            return entity1 == entity2
             
         default:
             return false
@@ -188,35 +219,44 @@ public enum CoreStoreError: Error, CustomNSError, Hashable {
     
     
     // MARK: Hashable
-    
-    public var hashValue: Int {
-        
-        let code = self._code
+
+    public func hash(into hasher: inout Hasher) {
+
+        hasher.combine(self._code)
         switch self {
-            
+
         case .unknown:
-            return code.hashValue
-            
+            break
+
         case .differentStorageExistsAtURL(let existingPersistentStoreURL):
-            return code.hashValue ^ existingPersistentStoreURL.hashValue
-            
+            hasher.combine(existingPersistentStoreURL)
+
         case .mappingModelNotFound(let localStoreURL, let targetModel, let targetModelVersion):
-            return code.hashValue ^ localStoreURL.hashValue ^ targetModel.hashValue ^ targetModelVersion.hashValue
-            
+            hasher.combine(localStoreURL)
+            hasher.combine(targetModel)
+            hasher.combine(targetModelVersion)
+
         case .progressiveMigrationRequired(let localStoreURL):
-            return code.hashValue ^ localStoreURL.hashValue
-            
+            hasher.combine(localStoreURL)
+
+        case .asynchronousMigrationRequired(let localStoreURL, let nsError):
+            hasher.combine(localStoreURL)
+            hasher.combine(nsError)
+
         case .internalError(let nsError):
-            return code.hashValue ^ nsError.hashValue
-            
+            hasher.combine(nsError)
+
         case .userError(let error):
-            return code.hashValue ^ (error as NSError).hashValue
-            
+            hasher.combine(error as NSError)
+
+        case .persistentStoreNotFound(let entity):
+            hasher.combine(ObjectIdentifier(entity))
+
         case .userCancelled:
-            return code.hashValue
+            break
         }
     }
-    
+
     
     // MARK: Internal
     
@@ -262,6 +302,11 @@ public enum CoreStoreErrorCode: Int {
      Progressive migrations are disabled for a store, but an `NSMappingModel` could not be found for a specific source and destination model versions.
      */
     case progressiveMigrationRequired
+
+    /**
+     The `LocalStorage` was configured with `.allowSynchronousLightweightMigration`, but the model can only be migrated asynchronously.
+     */
+    case asynchronousMigrationRequired
     
     /**
      An internal SDK call failed with the specified "NSError" userInfo key.
@@ -277,12 +322,17 @@ public enum CoreStoreErrorCode: Int {
      The transaction was cancelled by the user.
      */
     case userCancelled
+
+    /**
+     Attempted to perform a fetch but could not find any related persistent store.
+     */
+    case persistentStoreNotFound
 }
 
 
 // MARK: - NSError
 
-public extension NSError {
+extension NSError {
     
     // MARK: Internal
     

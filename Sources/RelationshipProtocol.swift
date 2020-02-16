@@ -2,7 +2,7 @@
 //  RelationshipProtocol.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,17 +29,22 @@ import CoreData
 
 // MARK: - RelationshipProtocol
 
-internal protocol RelationshipProtocol: class {
-    
-    var keyPath: KeyPathString { get }
-    var isToMany: Bool { get }
-    var isOrdered: Bool { get }
-    var deleteRule: NSDeleteRule { get }
-    var inverse: (type: CoreStoreObject.Type, keyPath: () -> KeyPathString?) { get }
-    var affectedByKeyPaths: () -> Set<String> { get }
-    var parentObject: CoreStoreObject? { get set }
-    var versionHashModifier: () -> String? { get }
-    var renamingIdentifier: () -> String? { get }
-    var minCount: Int { get }
-    var maxCount: Int { get }
+internal protocol RelationshipProtocol: PropertyProtocol {
+
+    typealias EntityDescriptionValues = (
+        isToMany: Bool,
+        isOrdered: Bool,
+        deleteRule: NSDeleteRule,
+        inverse: (type: CoreStoreObject.Type, KeyPathString?),
+        versionHashModifier: String?,
+        renamingIdentifier: String?,
+        affectedByKeyPaths: Set<String>,
+        minCount: Int,
+        maxCount: Int
+    )
+
+    var entityDescriptionValues: () -> EntityDescriptionValues { get }
+
+    var rawObject: CoreStoreManagedObject? { get set }
+    var valueForSnapshot: Any? { get }
 }

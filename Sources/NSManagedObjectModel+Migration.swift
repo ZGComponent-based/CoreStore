@@ -2,7 +2,7 @@
 //  NSManagedObjectModel+Migration.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,16 +29,19 @@ import Foundation
 
 // MARK: - FilePrivate
 
-internal extension NSManagedObjectModel {
+extension NSManagedObjectModel {
     
     @nonobjc
-    internal func cs_resolvedRenamingIdentities() -> [String: (entity: NSEntityDescription, versionHash: Data)] {
-        
-        var mapping: [String: (entity: NSEntityDescription, versionHash: Data)] = [:]
-        for (entityName, entityDescription) in self.entitiesByName {
-            
-            mapping[entityDescription.renamingIdentifier ?? entityName] = (entityDescription, entityDescription.versionHash)
-        }
-        return mapping
+    internal func cs_resolveNames() -> [String: (entity: NSEntityDescription, versionHash: Data)] {
+        return self.entitiesByName.reduce(into: [:], { (result, entity: (name: String, description: NSEntityDescription)) in
+            result[entity.name] = (entity.description, entity.description.versionHash)
+        })
+    }
+    
+    @nonobjc
+    internal func cs_resolveRenamingIdentities() -> [String: (entity: NSEntityDescription, versionHash: Data)] {
+        return self.entitiesByName.reduce(into: [:], { (result, entity: (name: String, description: NSEntityDescription)) in
+            result[entity.description.renamingIdentifier ?? entity.name] = (entity.description, entity.description.versionHash)
+        })
     }
 }

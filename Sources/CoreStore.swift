@@ -2,7 +2,7 @@
 //  CoreStore.swift
 //  CoreStore
 //
-//  Copyright © 2014 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,39 +31,20 @@ import CoreData
 /**
  `CoreStore` is the main entry point for all other APIs.
  */
+@available(*, deprecated, message: "Call methods directly from the DataStack instead")
 public enum CoreStore {
-    
-    /**
-     The default `DataStack` instance to be used. If `defaultStack` is not set before the first time accessed, a default-configured `DataStack` will be created.
-     - SeeAlso: `DataStack`
-     - Note: Changing the `defaultStack` is thread safe, but it is recommended to setup `DataStacks` on a common queue (e.g. the main queue).
-     */
+
+    @available(*, unavailable, renamed: "CoreStoreDefaults.logger")
+    public static var logger: CoreStoreLogger {
+
+        get { return CoreStoreDefaults.logger }
+        set { CoreStoreDefaults.logger = newValue }
+    }
+
+    @available(*, unavailable, renamed: "CoreStoreDefaults.dataStack")
     public static var defaultStack: DataStack {
         
-        get {
-        
-            self.defaultStackBarrierQueue.sync(flags: .barrier) {
-                
-                if self.defaultStackInstance == nil {
-                    
-                    self.defaultStackInstance = DataStack()
-                }
-            }
-            return self.defaultStackInstance!
-        }
-        set {
-            
-            self.defaultStackBarrierQueue.async(flags: .barrier) {
-                
-                self.defaultStackInstance = newValue
-            }
-        }
+        get { return CoreStoreDefaults.dataStack }
+        set { CoreStoreDefaults.dataStack = newValue }
     }
-    
-    
-    // MARK: Private
-    
-    private static let defaultStackBarrierQueue = DispatchQueue.concurrent("com.coreStore.defaultStackBarrierQueue")
-    
-    private static var defaultStackInstance: DataStack?
 }

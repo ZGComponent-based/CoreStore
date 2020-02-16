@@ -2,7 +2,7 @@
 //  DispatchQueue+CoreStore.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import Foundation
 
 // MARK: - DispatchQueue
 
-internal extension DispatchQueue {
+extension DispatchQueue {
     
     @nonobjc @inline(__always)
     internal static func serial(_ label: String, qos: DispatchQoS = .default) -> DispatchQueue {

@@ -2,7 +2,7 @@
 //  CSTweak.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import CoreData
  
  - SeeAlso: `Tweak`
  */
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 @objc
 public final class CSTweak: NSObject, CSFetchClause, CSQueryClause, CSDeleteClause, CoreStoreObjectiveCType {
     
@@ -63,7 +64,7 @@ public final class CSTweak: NSObject, CSFetchClause, CSQueryClause, CSDeleteClau
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -90,6 +91,7 @@ public final class CSTweak: NSObject, CSFetchClause, CSQueryClause, CSDeleteClau
 
 // MARK: - Tweak
 
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 extension Tweak: CoreStoreSwiftType {
     
     // MARK: CoreStoreSwiftType

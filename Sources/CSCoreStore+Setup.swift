@@ -2,7 +2,7 @@
 //  CSCoreStore+Setup.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@ import CoreData
 
 // MARK: - CSCoreStore
 
-public extension CSCoreStore {
+@available(*, deprecated, message: "Call methods directly from the CSDataStack instead")
+extension CSCoreStore {
     
     /**
      Returns the `defaultStack`'s model version. The version string is the same as the name of the version-specific .xcdatamodeld file.
@@ -37,7 +38,7 @@ public extension CSCoreStore {
     @objc
     public static var modelVersion: String {
         
-        return CoreStore.modelVersion
+        return self.defaultStack.modelVersion
     }
     
     /**
@@ -46,7 +47,7 @@ public extension CSCoreStore {
     @objc
     public static func entityTypesByNameForType(_ type: NSManagedObject.Type) -> [EntityName: NSManagedObject.Type] {
         
-        return CoreStore.entityTypesByName(for: type)
+        return self.defaultStack.bridgeToSwift.entityTypesByName(for: type)
     }
     
     /**
@@ -55,7 +56,7 @@ public extension CSCoreStore {
     @objc
     public static func entityDescriptionForClass(_ type: NSManagedObject.Type) -> NSEntityDescription? {
         
-        return CoreStore.entityDescription(for: type)
+        return self.defaultStack.bridgeToSwift.entityDescription(for: type)
     }
     
     /**
@@ -124,22 +125,5 @@ public extension CSCoreStore {
     public static func addSQLiteStorageAndWait(_ storage: CSSQLiteStore, error: NSErrorPointer) -> CSSQLiteStore? {
         
         return self.defaultStack.addSQLiteStorageAndWait(storage, error: error)
-    }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, message: "Use the new +entityTypesByNameForType: method passing `[NSManagedObject class]` as argument.")
-    @objc
-    public static var entityClassesByName: [EntityName: NSManagedObject.Type] {
-        
-        return CoreStore.entityTypesByName
-    }
-    
-    @available(*, deprecated, message: "Use the new +entityTypesByNameForType: method passing `[NSManagedObject class]` as argument.")
-    @objc
-    public static func entityClassWithName(_ name: EntityName) -> NSManagedObject.Type? {
-        
-        return CoreStore.entityTypesByName[name]
     }
 }

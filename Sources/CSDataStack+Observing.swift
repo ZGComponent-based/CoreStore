@@ -2,7 +2,7 @@
 //  CSDataStack+Observing.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,14 +29,15 @@ import CoreData
 
 // MARK: - CSDataStack
 
-@available(OSX 10.12, *)
-public extension CSDataStack {
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
+@available(macOS 10.12, *)
+extension CSDataStack {
     
     /**
      Creates a `CSObjectMonitor` for the specified `NSManagedObject`. Multiple `ObjectObserver`s may then register themselves to be notified when changes are made to the `NSManagedObject`.
      
      - parameter object: the `NSManagedObject` to observe changes from
-     - returns: a `ObjectMonitor` that monitors changes to `object`
+     - returns: an `ObjectMonitor` that monitors changes to `object`
      */
     @objc
     public func monitorObject(_ object: NSManagedObject) -> CSObjectMonitor {
@@ -54,11 +55,11 @@ public extension CSDataStack {
     @objc
     public func monitorListFrom(_ from: CSFrom, fetchClauses: [CSFetchClause]) -> CSListMonitor {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to observe objects from \(cs_typeName(self)) outside the main thread."
+            "Attempted to observe objects from \(Internals.typeName(self)) outside the main thread."
         )
-        CoreStore.assert(
+        Internals.assert(
             fetchClauses.contains { $0 is CSOrderBy },
             "A CSListMonitor requires a CSOrderBy clause."
         )
@@ -68,7 +69,7 @@ public extension CSDataStack {
             sectionBy: nil,
             applyFetchClauses: { (fetchRequest) in
                 
-                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest as! NSFetchRequest<NSFetchRequestResult>) }
+                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
             }
         ).bridgeToObjectiveC
     }
@@ -83,11 +84,11 @@ public extension CSDataStack {
     @objc
     public func monitorListByCreatingAsynchronously(_ createAsynchronously: @escaping (CSListMonitor) -> Void, from: CSFrom, fetchClauses: [CSFetchClause]) {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to observe objects from \(cs_typeName(self)) outside the main thread."
+            "Attempted to observe objects from \(Internals.typeName(self)) outside the main thread."
         )
-        CoreStore.assert(
+        Internals.assert(
             fetchClauses.contains { $0 is CSOrderBy },
             "A CSListMonitor requires an CSOrderBy clause."
         )
@@ -97,7 +98,7 @@ public extension CSDataStack {
             sectionBy: nil,
             applyFetchClauses: { (fetchRequest) in
                 
-                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest as! NSFetchRequest<NSFetchRequestResult>) }
+                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
             },
             createAsynchronously: {
                 
@@ -117,11 +118,11 @@ public extension CSDataStack {
     @objc
     public func monitorSectionedListFrom(_ from: CSFrom, sectionBy: CSSectionBy, fetchClauses: [CSFetchClause]) -> CSListMonitor {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to observe objects from \(cs_typeName(self)) outside the main thread."
+            "Attempted to observe objects from \(Internals.typeName(self)) outside the main thread."
         )
-        CoreStore.assert(
+        Internals.assert(
             fetchClauses.contains { $0 is CSOrderBy },
             "A CSListMonitor requires an CSOrderBy clause."
         )
@@ -131,7 +132,7 @@ public extension CSDataStack {
             sectionBy: sectionBy.bridgeToSwift,
             applyFetchClauses: { (fetchRequest) in
                 
-                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest as! NSFetchRequest<NSFetchRequestResult>) }
+                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
             }
         ).bridgeToObjectiveC
     }
@@ -146,11 +147,11 @@ public extension CSDataStack {
      */
     public func monitorSectionedListByCreatingAsynchronously(_ createAsynchronously: @escaping (CSListMonitor) -> Void, from: CSFrom, sectionBy: CSSectionBy, fetchClauses: [CSFetchClause]) {
         
-        CoreStore.assert(
+        Internals.assert(
             Thread.isMainThread,
-            "Attempted to observe objects from \(cs_typeName(self)) outside the main thread."
+            "Attempted to observe objects from \(Internals.typeName(self)) outside the main thread."
         )
-        CoreStore.assert(
+        Internals.assert(
             fetchClauses.contains { $0 is CSOrderBy },
             "A CSListMonitor requires an CSOrderBy clause."
         )
@@ -160,7 +161,7 @@ public extension CSDataStack {
             sectionBy: sectionBy.bridgeToSwift,
             applyFetchClauses: { (fetchRequest) in
                 
-                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest as! NSFetchRequest<NSFetchRequestResult>) }
+                fetchClauses.forEach { $0.applyToFetchRequest(fetchRequest) }
             },
             createAsynchronously: {
                 

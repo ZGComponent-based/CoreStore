@@ -2,7 +2,7 @@
 //  StorageInterface.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import CoreData
 /**
  The `StorageInterface` represents the data store managed (or to be managed) by the `DataStack`. When added to the `DataStack`, the `StorageInterface` serves as the interface for the `NSPersistentStore`. This may be a database file, an in-memory store, etc.
  */
-public protocol StorageInterface: class {
+public protocol StorageInterface: AnyObject {
     
     /**
      The string identifier for the `NSPersistentStore`'s `type` property. This is the same string CoreStore will use to create the `NSPersistentStore` from the `NSPersistentStoreCoordinator`'s `addPersistentStoreWithType(...)` method.
@@ -152,117 +152,12 @@ public protocol LocalStorage: StorageInterface {
     func cs_eraseStorageAndWait(metadata: [String: Any], soureModelHint: NSManagedObjectModel?) throws
 }
 
-internal extension LocalStorage {
+extension LocalStorage {
     
     internal func matchesPersistentStore(_ persistentStore: NSPersistentStore) -> Bool {
         
-        return persistentStore.type == type(of: self).storeType
+        return persistentStore.type == Self.storeType
             && persistentStore.configurationName == (self.configuration ?? DataStack.defaultConfigurationName)
             && persistentStore.url == self.fileURL
-    }
-}
-
-
-// MARK: - CloudStorageOptions
-
-/**
- The `CloudStorageOptions` provides settings that tells the `DataStack` how to setup the persistent store for `LocalStorage` implementers.
- */
-public struct CloudStorageOptions: OptionSet, ExpressibleByNilLiteral {
-    
-    /**
-     Tells the `DataStack` that the store should not be migrated or recreated, and should simply fail on model mismatch
-     */
-    public static let none = CloudStorageOptions(rawValue: 0)
-    
-    /**
-     Tells the `DataStack` to delete and recreate the local store from the cloud store on model mismatch, otherwise exceptions will be thrown on failure instead
-     */
-    public static let recreateLocalStoreOnModelMismatch = CloudStorageOptions(rawValue: 1 << 0)
-    
-    /**
-     Tells the `DataStack` to allow lightweight migration for the store when added synchronously
-     */
-    public static let allowSynchronousLightweightMigration = CloudStorageOptions(rawValue: 1 << 2)
-    
-    
-    // MARK: OptionSetType
-    
-    public init(rawValue: Int) {
-        
-        self.rawValue = rawValue
-    }
-    
-    
-    // MARK: RawRepresentable
-    
-    public let rawValue: Int
-    
-    
-    // MARK: ExpressibleByNilLiteral
-    
-    public init(nilLiteral: ()) {
-        
-        self.rawValue = 0
-    }
-}
-
-
-// MARK: - CloudStorage
-
-/**
- The `CloudStorage` represents `StorageInterface`s that are synchronized from a cloud-based store.
- */
-public protocol CloudStorage: StorageInterface {
-    
-    /**
-     The `NSURL` that points to the store file
-     */
-    var cacheFileURL: URL { get }
-    
-    /**
-     Options that tell the `DataStack` how to setup the persistent store
-     */
-    var cloudStorageOptions: CloudStorageOptions { get }
-    
-    /**
-     The options dictionary for the specified `CloudStorageOptions`
-     */
-    func dictionary(forOptions options: CloudStorageOptions) -> [AnyHashable: Any]?
-    
-    /**
-     Called by the `DataStack` to perform actual deletion of the store file from disk. **Do not call directly!** The `sourceModel` argument is a hint for the existing store's model version. Implementers can use the `sourceModel` to perform necessary store operations. (Cloud stores for example, can set the NSPersistentStoreRemoveUbiquitousMetadataOption option before deleting)
-     */
-    func cs_eraseStorageAndWait(soureModel: NSManagedObjectModel) throws
-}
-
-
-// MARK: - Internal
-
-internal extension CloudStorage {
-    
-    internal func matchesPersistentStore(_ persistentStore: NSPersistentStore) -> Bool {
-        
-        guard persistentStore.type == type(of: self).storeType
-            && persistentStore.configurationName == (self.configuration ?? DataStack.defaultConfigurationName) else {
-                
-                return false
-        }
-        guard persistentStore.url == self.cacheFileURL else {
-            
-            return false
-        }
-        guard let persistentStoreOptions = persistentStore.options,
-            let storeOptions = self.storeOptions else {
-                
-                return persistentStore.options == nil && self.storeOptions == nil
-        }
-        return storeOptions.reduce(true) { (isMatch, tuple) in
-            
-            let (key, value) = tuple
-            let obj1 = persistentStoreOptions[key] as? NSObject
-            let obj2 = value as? NSObject
-            return isMatch && (obj1 == obj2)
-        }
     }
 }

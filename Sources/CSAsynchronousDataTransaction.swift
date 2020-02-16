@@ -2,7 +2,7 @@
 //  CSAsynchronousDataTransaction.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import CoreData
  
  - SeeAlso: `AsynchronousDataTransaction`
  */
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 @objc
 public final class CSAsynchronousDataTransaction: CSBaseDataTransaction, CoreStoreObjectiveCType {
     
@@ -46,13 +47,13 @@ public final class CSAsynchronousDataTransaction: CSBaseDataTransaction, CoreSto
     @objc
     public func commitWithSuccess(_ success: (() -> Void)?, failure: ((CSError) -> Void)?) {
         
-        CoreStore.assert(
+        Internals.assert(
             self.bridgeToSwift.transactionQueue.cs_isCurrentExecutionContext(),
-            "Attempted to commit a \(cs_typeName(self)) outside its designated queue."
+            "Attempted to commit a \(Internals.typeName(self)) outside its designated queue."
         )
-        CoreStore.assert(
+        Internals.assert(
             !self.bridgeToSwift.isCommitted,
-            "Attempted to commit a \(cs_typeName(self)) more than once."
+            "Attempted to commit a \(Internals.typeName(self)) more than once."
         )
         self.bridgeToSwift.autoCommit { (_, error) in
             
@@ -72,7 +73,7 @@ public final class CSAsynchronousDataTransaction: CSBaseDataTransaction, CoreSto
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -156,46 +157,12 @@ public final class CSAsynchronousDataTransaction: CSBaseDataTransaction, CoreSto
         
         super.init(swiftValue)
     }
-    
-    
-    // MARK: Deprecated
-    
-    @available(*, deprecated, message: "Use the new -[CSAsynchronousDataTransaction commitWithSuccess:failure:] method.")
-    @objc
-    public func commitWithCompletion(_ completion: ((_ result: CSSaveResult) -> Void)?) {
-        
-        CoreStore.assert(
-            self.bridgeToSwift.transactionQueue.cs_isCurrentExecutionContext(),
-            "Attempted to commit a \(cs_typeName(self)) outside its designated queue."
-        )
-        CoreStore.assert(
-            !self.bridgeToSwift.isCommitted,
-            "Attempted to commit a \(cs_typeName(self)) more than once."
-        )
-        self.bridgeToSwift.commit { (result) in
-            
-            completion?(result.bridgeToObjectiveC)
-        }
-    }
-    
-    @available(*, deprecated, message: "Secondary tasks spawned from CSAsynchronousDataTransactions and CSSynchronousDataTransactions are no longer supported. ")
-    @objc
-    @discardableResult
-    public func beginSynchronous(_ closure: @escaping (_ transaction: CSSynchronousDataTransaction) -> Void) -> CSSaveResult? {
-        
-        return bridge {
-            
-            self.bridgeToSwift.beginSynchronous { (transaction) in
-                
-                closure(transaction.bridgeToObjectiveC)
-            }
-        }
-    }
 }
 
 
 // MARK: - AsynchronousDataTransaction
 
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 extension AsynchronousDataTransaction: CoreStoreSwiftType {
     
     // MARK: CoreStoreSwiftType

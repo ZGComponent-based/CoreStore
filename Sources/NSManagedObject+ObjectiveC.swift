@@ -2,7 +2,7 @@
 //  NSManagedObject+ObjectiveC.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import CoreData
 
 // MARK: - NSManagedObject
 
-public extension NSManagedObject {
+extension NSManagedObject {
     
     /**
      Provides a convenience wrapper for accessing `-primitiveValueForKey:` with proper calls to `-willAccessValueForKey:` and `-didAccessValueForKey:`. This is useful when implementing accessor methods for transient attributes.

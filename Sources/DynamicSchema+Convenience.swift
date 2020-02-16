@@ -2,7 +2,7 @@
 //  DynamicSchema+Convenience.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import Foundation
 
 // MARK: - DynamicSchema
 
-public extension DynamicSchema {
+extension DynamicSchema {
     
     /**
      Prints the `DynamicSchema` as their corresponding `CoreStoreObject` Swift declarations. This is useful for converting current `XcodeDataModelSchema`-based models into the new `CoreStoreSchema` framework. Additional adjustments may need to be done to the generated source code; for example: `Transformable` concrete types need to be provided, as well as `default` values.
@@ -153,11 +153,10 @@ public extension DynamicSchema {
                         valueType = Data.self
                         if let defaultValue = (attribute.defaultValue as! Data.QueryableNativeType?).flatMap(Data.cs_fromQueryableNativeType) {
                             
-                            let count = defaultValue.count
-                            let bytes = defaultValue.withUnsafeBytes { (pointer: UnsafePointer<UInt8>) in
-                                
-                                return (0 ..< (count / MemoryLayout<UInt8>.size))
-                                    .map({ "\("0x\(String(pointer[$0], radix: 16, uppercase: false))")" })
+                            let bytes = defaultValue.withUnsafeBytes { (pointer) in
+                                return pointer
+                                    .bindMemory(to: UInt64.self)
+                                    .map({ "\("0x\(String($0, radix: 16, uppercase: false))")" })
                             }
                             defaultString = ", initial: Data(bytes: [\(bytes.joined(separator: ", "))])"
                         }
@@ -181,7 +180,6 @@ public extension DynamicSchema {
                     default:
                         fatalError("Unsupported attribute type: \(attribute.attributeType.rawValue)")
                     }
-                    let indexedString = attribute.isIndexed ? ", isIndexed: true" : ""
                     let transientString = attribute.isTransient ? ", isTransient: true" : ""
                     // TODO: escape strings
                     let versionHashModifierString = attribute.versionHashModifier
@@ -189,7 +187,7 @@ public extension DynamicSchema {
                     // TODO: escape strings
                     let renamingIdentifierString = attribute.renamingIdentifier
                         .flatMap({ ($0 == attributeName ? "" : ", renamingIdentifier: \"\($0)\"") as String }) ?? ""
-                    output.append("    let \(attributeName) = \(containerType)<\(String(describing: valueType))>(\"\(attributeName)\"\(indexedString)\(defaultString)\(transientString)\(versionHashModifierString)\(renamingIdentifierString))\n")
+                    output.append("    let \(attributeName) = \(containerType)<\(String(describing: valueType))>(\"\(attributeName)\"\(defaultString)\(transientString)\(versionHashModifierString)\(renamingIdentifierString))\n")
                 }
             }
             

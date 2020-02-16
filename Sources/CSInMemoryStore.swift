@@ -2,7 +2,7 @@
 //  CSInMemoryStore.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import CoreData
  
  - SeeAlso: `InMemoryStore`
  */
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 @objc
 public final class CSInMemoryStore: NSObject, CSStorageInterface, CoreStoreObjectiveCType {
     
@@ -103,7 +104,7 @@ public final class CSInMemoryStore: NSObject, CSStorageInterface, CoreStoreObjec
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -121,6 +122,7 @@ public final class CSInMemoryStore: NSObject, CSStorageInterface, CoreStoreObjec
 
 // MARK: - InMemoryStore
 
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 extension InMemoryStore: CoreStoreSwiftType {
     
     // MARK: CoreStoreSwiftType

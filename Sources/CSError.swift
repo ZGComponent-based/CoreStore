@@ -2,7 +2,7 @@
 //  CSError.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ import CoreData
  - SeeAlso: `CoreStoreError`
  */
 @objc
-public final class CSError: NSError, CoreStoreObjectiveCType {
+public final class CSError: NSError {
     
     /**
      The `NSError` error domain for `CSError`.
@@ -44,6 +44,17 @@ public final class CSError: NSError, CoreStoreObjectiveCType {
      */
     @objc
     public static let errorDomain = CoreStoreErrorDomain
+
+    public var bridgeToSwift: CoreStoreError {
+
+        if let swift = self.swiftError {
+
+            return swift
+        }
+        let swift = CoreStoreError(_bridgedNSError: self) ?? .unknown
+        self.swiftError = swift
+        return swift
+    }
     
     
     // MARK: NSObject
@@ -64,21 +75,7 @@ public final class CSError: NSError, CoreStoreObjectiveCType {
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
-    }
-    
-    
-    // MARK: CoreStoreObjectiveCType
-    
-    public var bridgeToSwift: CoreStoreError {
-        
-        if let swift = self.swiftError {
-            
-            return swift
-        }
-        let swift = CoreStoreError(_bridgedNSError: self) ?? .unknown
-        self.swiftError = swift
-        return swift
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     /**
@@ -101,6 +98,9 @@ public final class CSError: NSError, CoreStoreObjectiveCType {
     private var swiftError: CoreStoreError?
 }
 
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
+extension CSError: CoreStoreObjectiveCType {}
+
 
 // MARK: - CSErrorCode
 
@@ -110,6 +110,7 @@ public final class CSError: NSError, CoreStoreObjectiveCType {
  - SeeAlso: `CSError`
  - SeeAlso: `CoreStoreError`
  */
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
 @objc
 public enum CSErrorCode: Int {
     
@@ -152,15 +153,7 @@ public enum CSErrorCode: Int {
 
 // MARK: - CoreStoreError
 
-extension CoreStoreError: CoreStoreSwiftType, _ObjectiveCBridgeableError {
-    
-    // MARK: CoreStoreSwiftType
-    
-    public var bridgeToObjectiveC: CSError {
-        
-        return CSError(self)
-    }
-    
+extension CoreStoreError: _ObjectiveCBridgeableError {
     
     // MARK: _ObjectiveCBridgeableError
     
@@ -217,6 +210,17 @@ extension CoreStoreError: CoreStoreSwiftType, _ObjectiveCBridgeableError {
                 return
             }
             self = .progressiveMigrationRequired(localStoreURL: localStoreURL)
+
+        case .asynchronousMigrationRequired:
+            guard
+                let localStoreURL = info["localStoreURL"] as? URL,
+                case let nsError as NSError = info["NSError"]
+                else {
+
+                    self = .unknown
+                    return
+            }
+            self = .asynchronousMigrationRequired(localStoreURL: localStoreURL, NSError: nsError)
             
         case .internalError:
             guard case let nsError as NSError = info["NSError"] else {
@@ -236,14 +240,24 @@ extension CoreStoreError: CoreStoreSwiftType, _ObjectiveCBridgeableError {
             
         case .userCancelled:
             self = .userCancelled
+
+        case .persistentStoreNotFound:
+            guard let entity = info["entity"] as? DynamicObject.Type else {
+
+                self = .unknown
+                return
+            }
+            self = .persistentStoreNotFound(entity: entity)
         }
     }
 }
 
 
-// MARK: Internal
+// MARK: - Error
 
-internal extension Error {
+extension Error {
+
+    // MARK: Internal
     
     internal var bridgeToSwift: CoreStoreError {
         
@@ -255,14 +269,15 @@ internal extension Error {
         case let error as CSError:
             return error.bridgeToSwift
             
-        case let error as NSError where type(of: self) is NSError.Type:
+        case let error as NSError where Self.self is NSError.Type:
             return .internalError(NSError: error)
             
         default:
             return .unknown
         }
     }
-    
+
+    @available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
     internal var bridgeToObjectiveC: NSError {
         
         switch self {
@@ -276,5 +291,19 @@ internal extension Error {
         default:
             return self as NSError
         }
+    }
+}
+
+
+// MARK: - CoreStoreError
+
+@available(*, deprecated, message: "CoreStore Objective-C API will be removed soon.")
+extension CoreStoreError: CoreStoreSwiftType {
+
+    // MARK: CoreStoreSwiftType
+
+    public var bridgeToObjectiveC: CSError {
+
+        return CSError(self)
     }
 }

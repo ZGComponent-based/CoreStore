@@ -2,7 +2,7 @@
 //  KeyPath+Querying.swift
 //  CoreStore
 //
-//  Copyright © 2017 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import Foundation
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname == "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname == "John"))
  ```
  */
 public func == <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ keyPath: KeyPath<O, V>, _ value: V) -> Where<O> {
@@ -43,7 +43,7 @@ public func == <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ key
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname != "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname != "John"))
  ```
  */
 public func != <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ keyPath: KeyPath<O, V>, _ value: V) -> Where<O> {
@@ -54,7 +54,7 @@ public func != <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ key
 /**
  Creates a `Where` clause by checking if a sequence contains the value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
+ let dog = dataStack.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
  ```
  */
 public func ~= <O: NSManagedObject, V: QueryableAttributeType & Equatable, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, V>) -> Where<O> where S.Iterator.Element == V {
@@ -68,7 +68,7 @@ public func ~= <O: NSManagedObject, V: QueryableAttributeType & Equatable, S: Se
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname == "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname == "John"))
  ```
  */
 public func == <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ keyPath: KeyPath<O, Optional<V>>, _ value: V?) -> Where<O> {
@@ -79,7 +79,7 @@ public func == <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ key
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname != "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname != "John"))
  ```
  */
 public func != <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ keyPath: KeyPath<O, Optional<V>>, _ value: V?) -> Where<O> {
@@ -90,7 +90,7 @@ public func != <O: NSManagedObject, V: QueryableAttributeType & Equatable>(_ key
 /**
  Creates a `Where` clause by checking if a sequence contains the value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
+ let dog = dataStack.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
  ```
  */
 public func ~= <O: NSManagedObject, V: QueryableAttributeType & Equatable, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, Optional<V>>) -> Where<O> where S.Iterator.Element == V {
@@ -104,45 +104,45 @@ public func ~= <O: NSManagedObject, V: QueryableAttributeType & Equatable, S: Se
 /**
  Creates a `Where` clause by comparing if a property is less than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age < 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age < 20))
  ```
  */
 public func < <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, V>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K < %@", keyPath._kvcKeyPathString!, value)
+    return Where<O>("%K < %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
 }
 
 /**
  Creates a `Where` clause by comparing if a property is greater than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age > 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age > 20))
  ```
  */
 public func > <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, V>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K > %@", keyPath._kvcKeyPathString!, value)
+    return Where<O>("%K > %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
 }
 
 /**
  Creates a `Where` clause by comparing if a property is less than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age <= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age <= 20))
  ```
  */
 public func <= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, V>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K <= %@", keyPath._kvcKeyPathString!, value)
+    return Where<O>("%K <= %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
 }
 
 /**
  Creates a `Where` clause by comparing if a property is greater than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age >= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age >= 20))
  ```
  */
 public func >= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, V>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K >= %@", keyPath._kvcKeyPathString!, value)
+    return Where<O>("%K >= %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
 }
 
 
@@ -151,14 +151,14 @@ public func >= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ ke
 /**
  Creates a `Where` clause by comparing if a property is less than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age < 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age < 20))
  ```
  */
 public func < <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K < %@", keyPath._kvcKeyPathString!, value)
+        return Where<O>("%K < %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -169,14 +169,14 @@ public func < <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ key
 /**
  Creates a `Where` clause by comparing if a property is greater than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age > 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age > 20))
  ```
  */
 public func > <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K > %@", keyPath._kvcKeyPathString!, value)
+        return Where<O>("%K > %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -187,14 +187,14 @@ public func > <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ key
 /**
  Creates a `Where` clause by comparing if a property is less than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age <= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age <= 20))
  ```
  */
 public func <= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K <= %@", keyPath._kvcKeyPathString!, value)
+        return Where<O>("%K <= %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -205,14 +205,14 @@ public func <= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ ke
 /**
  Creates a `Where` clause by comparing if a property is greater than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age >= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age >= 20))
  ```
  */
 public func >= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ keyPath: KeyPath<O, Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K >= %@", keyPath._kvcKeyPathString!, value)
+        return Where<O>("%K >= %@", keyPath._kvcKeyPathString!, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -226,7 +226,7 @@ public func >= <O: NSManagedObject, V: QueryableAttributeType & Comparable>(_ ke
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master == john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master == john))
  ```
  */
 public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>, _ object: D) -> Where<O> {
@@ -237,7 +237,7 @@ public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master != john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master != john))
  ```
  */
 public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>, _ object: D) -> Where<O> {
@@ -248,7 +248,7 @@ public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>
 /**
  Creates a `Where` clause by checking if a sequence contains a value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
+ let dog = dataStack.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
  ```
  */
 public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, D>) -> Where<O> where S.Iterator.Element == D {
@@ -259,7 +259,7 @@ public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence:
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master == john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master == john))
  ```
  */
 public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>, _ objectID: NSManagedObjectID) -> Where<O> {
@@ -270,7 +270,7 @@ public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master != john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master != john))
  ```
  */
 public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>, _ objectID: NSManagedObjectID) -> Where<O> {
@@ -281,7 +281,7 @@ public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, D>
 /**
  Creates a `Where` clause by checking if a sequence contains a value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
+ let dog = dataStack.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
  ```
  */
 public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, D>) -> Where<O> where S.Iterator.Element == NSManagedObjectID {
@@ -295,7 +295,7 @@ public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence:
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master == john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master == john))
  ```
  */
 public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Optional<D>>, _ object: D?) -> Where<O> {
@@ -306,7 +306,7 @@ public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Op
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master != john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master != john))
  ```
  */
 public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Optional<D>>, _ object: D?) -> Where<O> {
@@ -317,7 +317,7 @@ public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Op
 /**
  Creates a `Where` clause by checking if a sequence contains a value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
+ let dog = dataStack.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
  ```
  */
 public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, Optional<D>>) -> Where<O> where S.Iterator.Element == D {
@@ -328,7 +328,7 @@ public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence:
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master == john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master == john))
  ```
  */
 public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Optional<D>>, _ objectID: NSManagedObjectID) -> Where<O> {
@@ -339,7 +339,7 @@ public func == <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Op
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master != john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master != john))
  ```
  */
 public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Optional<D>>, _ objectID: NSManagedObjectID) -> Where<O> {
@@ -350,7 +350,7 @@ public func != <O: NSManagedObject, D: NSManagedObject>(_ keyPath: KeyPath<O, Op
 /**
  Creates a `Where` clause by checking if a sequence contains a value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
+ let dog = dataStack.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
  ```
  */
 public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, Optional<D>>) -> Where<O> where S.Iterator.Element == NSManagedObjectID {
@@ -364,7 +364,7 @@ public func ~= <O: NSManagedObject, D: NSManagedObject, S: Sequence>(_ sequence:
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname == "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname == "John"))
  ```
  */
 public func == <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ value: V) -> Where<O> {
@@ -375,7 +375,7 @@ public func == <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ va
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname != "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname != "John"))
  ```
  */
 public func != <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ value: V) -> Where<O> {
@@ -386,7 +386,7 @@ public func != <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ va
 /**
  Creates a `Where` clause by checking if a sequence contains the value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
+ let dog = dataStack.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
  ```
  */
 public func ~= <O, V, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>) -> Where<O> where S.Iterator.Element == V {
@@ -400,7 +400,7 @@ public func ~= <O, V, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, ValueCon
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname == "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname == "John"))
  ```
  */
 public func == <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ value: V?) -> Where<O> {
@@ -411,7 +411,7 @@ public func == <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ va
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.nickname != "John"))
+ let person = dataStack.fetchOne(From<Person>().where(\.nickname != "John"))
  ```
  */
 public func != <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ value: V?) -> Where<O> {
@@ -422,7 +422,7 @@ public func != <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ va
 /**
  Creates a `Where` clause by checking if a sequence contains the value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
+ let dog = dataStack.fetchOne(From<Dog>().where(["Pluto", "Snoopy", "Scooby"] ~= \.nickname))
  ```
  */
 public func ~= <O, V, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>) -> Where<O> where S.Iterator.Element == V {
@@ -436,45 +436,45 @@ public func ~= <O, V, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, ValueCon
 /**
  Creates a `Where` clause by comparing if a property is less than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age < 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age < 20))
  ```
  */
 public func < <O, V: Comparable>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K < %@", O.meta[keyPath: keyPath].keyPath, value)
+    return Where<O>("%K < %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
 }
 
 /**
  Creates a `Where` clause by comparing if a property is greater than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age > 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age > 20))
  ```
  */
 public func > <O, V: Comparable>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K > %@", O.meta[keyPath: keyPath].keyPath, value)
+    return Where<O>("%K > %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
 }
 
 /**
  Creates a `Where` clause by comparing if a property is less than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age <= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age <= 20))
  ```
  */
 public func <= <O, V: Comparable>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K <= %@", O.meta[keyPath: keyPath].keyPath, value)
+    return Where<O>("%K <= %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
 }
 
 /**
  Creates a `Where` clause by comparing if a property is greater than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age >= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age >= 20))
  ```
  */
 public func >= <O, V: Comparable>(_ keyPath: KeyPath<O, ValueContainer<O>.Required<V>>, _ value: V) -> Where<O> {
     
-    return Where<O>("%K >= %@", O.meta[keyPath: keyPath].keyPath, value)
+    return Where<O>("%K >= %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
 }
 
 
@@ -483,14 +483,14 @@ public func >= <O, V: Comparable>(_ keyPath: KeyPath<O, ValueContainer<O>.Requir
 /**
  Creates a `Where` clause by comparing if a property is less than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age < 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age < 20))
  ```
  */
 public func < <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
 
-        return Where<O>("%K < %@", O.meta[keyPath: keyPath].keyPath, value)
+        return Where<O>("%K < %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
     }
     else {
 
@@ -501,14 +501,14 @@ public func < <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ val
 /**
  Creates a `Where` clause by comparing if a property is greater than a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age > 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age > 20))
  ```
  */
 public func > <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K > %@", O.meta[keyPath: keyPath].keyPath, value)
+        return Where<O>("%K > %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -519,14 +519,14 @@ public func > <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ val
 /**
  Creates a `Where` clause by comparing if a property is less than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age <= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age <= 20))
  ```
  */
 public func <= <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K <= %@", O.meta[keyPath: keyPath].keyPath, value)
+        return Where<O>("%K <= %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -537,14 +537,14 @@ public func <= <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ va
 /**
  Creates a `Where` clause by comparing if a property is greater than or equal to a value
  ```
- let person = CoreStore.fetchOne(From<Person>().where(\.age >= 20))
+ let person = dataStack.fetchOne(From<Person>().where(\.age >= 20))
  ```
  */
 public func >= <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ value: V?) -> Where<O> {
     
     if let value = value {
         
-        return Where<O>("%K >= %@", O.meta[keyPath: keyPath].keyPath, value)
+        return Where<O>("%K >= %@", O.meta[keyPath: keyPath].keyPath, value.cs_toQueryableNativeType())
     }
     else {
         
@@ -558,7 +558,7 @@ public func >= <O, V>(_ keyPath: KeyPath<O, ValueContainer<O>.Optional<V>>, _ va
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master == john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master == john))
  ```
  */
 public func == <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, _ object: D) -> Where<O> {
@@ -569,7 +569,7 @@ public func == <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, 
 /**
  Creates a `Where` clause by comparing if a property is equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master == john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master == john))
  ```
  */
 public func == <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, _ object: D?) -> Where<O> {
@@ -580,7 +580,7 @@ public func == <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, 
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master != john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master != john))
  ```
  */
 public func != <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, _ object: D) -> Where<O> {
@@ -591,7 +591,7 @@ public func != <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, 
 /**
  Creates a `Where` clause by comparing if a property is not equal to a value
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where(\.master != john))
+ let dog = dataStack.fetchOne(From<Dog>().where(\.master != john))
  ```
  */
 public func != <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, _ object: D?) -> Where<O> {
@@ -602,7 +602,7 @@ public func != <O, D>(_ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>, 
 /**
  Creates a `Where` clause by checking if a sequence contains a value of a property
  ```
- let dog = CoreStore.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
+ let dog = dataStack.fetchOne(From<Dog>().where([john, bob, joe] ~= \.master))
  ```
  */
 public func ~= <O, D, S: Sequence>(_ sequence: S, _ keyPath: KeyPath<O, RelationshipContainer<O>.ToOne<D>>) -> Where<O> where S.Iterator.Element == D {

@@ -2,7 +2,7 @@
 //  CSFrom.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,7 @@ public final class CSFrom: NSObject {
             self.init(From(entityClass, nil))
             
         default:
-            CoreStore.abort("The configuration argument only accepts NSString and NSNull values")
+            Internals.abort("The configuration argument only accepts NSString and NSNull values")
         }
     }
     
@@ -126,7 +126,7 @@ public final class CSFrom: NSObject {
                 arguments.append(nil)
                 
             default:
-                CoreStore.abort("The configurations argument only accepts NSString and NSNull values")
+                Internals.abort("The configurations argument only accepts NSString and NSNull values")
             }
         }
         self.init(From(entityClass, arguments))
@@ -137,7 +137,7 @@ public final class CSFrom: NSObject {
     
     public override var description: String {
         
-        return "(\(String(reflecting: type(of: self)))) \(self.bridgeToSwift.coreStoreDumpString)"
+        return "(\(String(reflecting: Self.self))) \(self.bridgeToSwift.coreStoreDumpString)"
     }
     
     
@@ -145,7 +145,7 @@ public final class CSFrom: NSObject {
     
     public let bridgeToSwift: From<NSManagedObject>
     
-    public init<D: NSManagedObject>(_ swiftValue: From<D>) {
+    public init<O: NSManagedObject>(_ swiftValue: From<O>) {
         
         self.bridgeToSwift = swiftValue.downcast()
         super.init()
@@ -155,7 +155,7 @@ public final class CSFrom: NSObject {
 
 // MARK: - From
 
-extension From where D: NSManagedObject {
+extension From where O: NSManagedObject {
     
     // MARK: CoreStoreSwiftType
     

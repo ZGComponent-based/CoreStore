@@ -2,7 +2,7 @@
 //  StorageInterfaceTests.swift
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -83,7 +83,21 @@ final class StorageInterfaceTests: XCTestCase {
         let store = SQLiteStore()
         XCTAssertEqual(type(of: store).storeType, NSSQLiteStoreType)
         XCTAssertNil(store.configuration)
-        XCTAssertEqual(store.storeOptions as NSDictionary?, [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary)
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, *) {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"],
+                 NSBinaryStoreInsecureDecodingCompatibilityOption: true] as NSDictionary
+            )
+        }
+        else {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary
+            )
+        }
         
         XCTAssertEqual(store.fileURL, SQLiteStore.defaultFileURL)
         XCTAssertTrue(store.migrationMappingProviders.isEmpty)
@@ -93,12 +107,12 @@ final class StorageInterfaceTests: XCTestCase {
     @objc
     dynamic func test_ThatFileURLSQLiteStores_ConfigureCorrectly() {
         
-        let fileURL = NSURL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent(NSUUID().uuidString, isDirectory: false)!
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: false)
             .appendingPathExtension("db")
         let mappingProvider = XcodeSchemaMappingProvider(
             from: "V1", to: "V2",
-            mappingModelBundle: Bundle(for: type(of: self))
+            mappingModelBundle: Bundle(for: Self.self)
         )
         
         let store = SQLiteStore(
@@ -109,7 +123,21 @@ final class StorageInterfaceTests: XCTestCase {
         )
         XCTAssertEqual(type(of: store).storeType, NSSQLiteStoreType)
         XCTAssertEqual(store.configuration, "config1")
-        XCTAssertEqual(store.storeOptions as NSDictionary?, [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary)
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, *) {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"],
+                 NSBinaryStoreInsecureDecodingCompatibilityOption: true] as NSDictionary
+            )
+        }
+        else {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary
+            )
+        }
         
         XCTAssertEqual(store.fileURL, fileURL)
         XCTAssertEqual(store.migrationMappingProviders as! [XcodeSchemaMappingProvider], [mappingProvider])
@@ -122,7 +150,7 @@ final class StorageInterfaceTests: XCTestCase {
         let fileName = UUID().uuidString + ".db"
         let mappingProvider = XcodeSchemaMappingProvider(
             from: "V1", to: "V2",
-            mappingModelBundle: Bundle(for: type(of: self))
+            mappingModelBundle: Bundle(for: Self.self)
         )
         let store = SQLiteStore(
             fileName: fileName,
@@ -132,7 +160,21 @@ final class StorageInterfaceTests: XCTestCase {
         )
         XCTAssertEqual(type(of: store).storeType, NSSQLiteStoreType)
         XCTAssertEqual(store.configuration, "config1")
-        XCTAssertEqual(store.storeOptions as NSDictionary?, [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary)
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, *) {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"],
+                 NSBinaryStoreInsecureDecodingCompatibilityOption: true] as NSDictionary
+            )
+        }
+        else {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary
+            )
+        }
         
         XCTAssertEqual(store.fileURL.deletingLastPathComponent(), SQLiteStore.defaultRootDirectory)
         XCTAssertEqual(store.fileURL.lastPathComponent, fileName)
@@ -167,7 +209,21 @@ final class StorageInterfaceTests: XCTestCase {
         let store = SQLiteStore.legacy()
         XCTAssertEqual(type(of: store).storeType, NSSQLiteStoreType)
         XCTAssertNil(store.configuration)
-        XCTAssertEqual(store.storeOptions as NSDictionary?, [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary)
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, *) {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"],
+                 NSBinaryStoreInsecureDecodingCompatibilityOption: true] as NSDictionary
+            )
+        }
+        else {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary
+            )
+        }
         
         XCTAssertEqual(store.fileURL, SQLiteStore.legacyDefaultFileURL)
         XCTAssertTrue(store.migrationMappingProviders.isEmpty)
@@ -180,7 +236,7 @@ final class StorageInterfaceTests: XCTestCase {
         let fileName = UUID().uuidString + ".db"
         let mappingProvider = XcodeSchemaMappingProvider(
             from: "V1", to: "V2",
-            mappingModelBundle: Bundle(for: type(of: self))
+            mappingModelBundle: Bundle(for: Self.self)
         )
         let store = SQLiteStore.legacy(
             fileName: fileName,
@@ -190,7 +246,21 @@ final class StorageInterfaceTests: XCTestCase {
         )
         XCTAssertEqual(type(of: store).storeType, NSSQLiteStoreType)
         XCTAssertEqual(store.configuration, "config1")
-        XCTAssertEqual(store.storeOptions as NSDictionary?, [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary)
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, *) {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"],
+                 NSBinaryStoreInsecureDecodingCompatibilityOption: true] as NSDictionary
+            )
+        }
+        else {
+            
+            XCTAssertEqual(
+                store.storeOptions as NSDictionary?,
+                [NSSQLitePragmasOption: ["journal_mode": "WAL"]] as NSDictionary
+            )
+        }
         
         XCTAssertEqual(store.fileURL.deletingLastPathComponent(), SQLiteStore.legacyDefaultRootDirectory)
         XCTAssertEqual(store.fileURL.lastPathComponent, fileName)

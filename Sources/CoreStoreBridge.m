@@ -2,7 +2,7 @@
 //  CoreStoreBridge.m
 //  CoreStore
 //
-//  Copyright © 2016 John Rommel Estropia
+//  Copyright © 2018 John Rommel Estropia
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -218,40 +218,3 @@ CSWhere *_Nonnull CSWherePredicate(NSPredicate *_Nonnull predicate) CORESTORE_RE
     
     return [[CSWhere alloc] initWithPredicate:predicate];
 }
-
-
-#pragma mark CoreStoreFetchRequest
-
-@interface _CSFetchRequest ()
-
-@property (nullable, nonatomic, copy) NSArray<NSPersistentStore *> *safeAffectedStores;
-@property (nullable, nonatomic, assign) CFArrayRef releaseArray;
-
-@end
-
-@implementation _CSFetchRequest
-
-// MARK: NSFetchRequest
-
-- (void)setAffectedStores:(NSArray<NSPersistentStore *> *_Nullable)affectedStores {
-    
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber10_0
-        || [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){ 11, 0, 0 }]) {
-        
-        self.safeAffectedStores = affectedStores;
-        [super setAffectedStores:affectedStores];
-        return;
-    }
-    // Bugfix for NSFetchRequest messing up memory management for `affectedStores`
-    // http://stackoverflow.com/questions/14396375/nsfetchedresultscontroller-crashes-in-ios-6-if-affectedstores-is-specified
-    if (self.releaseArray != NULL) {
-        
-        CFRelease(self.releaseArray);
-        self.releaseArray = NULL;
-    }
-    self.safeAffectedStores = affectedStores;
-    [super setAffectedStores:affectedStores];
-    self.releaseArray = CFBridgingRetain([super affectedStores]);
-}
-
-@end
